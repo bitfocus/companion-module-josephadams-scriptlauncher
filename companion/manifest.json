@@ -1,0 +1,26 @@
+{
+	"id": "josephadams-scriptlauncher",
+	"name": "josephadams-scriptlauncher",
+	"shortname": "scriptlauncher",
+	"description": "Run scripts remotely on other computers",
+	"version": "0.0.0",
+	"license": "MIT",
+	"repository": "git+https://github.com/bitfocus/companion-module-josephadams-scriptlauncher.git",
+	"bugs": "https://github.com/bitfocus/companion-module-josephadams-scriptlauncher/issues",
+	"maintainers": [
+		{
+			"name": "Joseph Adams",
+			"email": "joseph@josephadams.dev"
+		}
+	],
+	"legacyIds": [],
+	"runtime": {
+		"type": "node22",
+		"api": "nodejs-ipc",
+		"apiVersion": "0.0.0",
+		"entrypoint": "../dist/main.js"
+	},
+	"manufacturer": "Joseph Adams",
+	"products": ["Script Launcher"],
+	"keywords": ["script", "remote", "execute"]
+}
