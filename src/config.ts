@@ -14,7 +14,8 @@ export function GetConfigFields(): SomeCompanionConfigField[] {
 			id: 'info',
 			width: 12,
 			label: 'Information',
-			value: 'This module will communicate with Script Launcher, a free program that lets you run scripts/executables remotely. You can download it from <a href="http://github.com/josephdadams/scriptlauncher">here</a>.',
+			value:
+				'This module will communicate with Script Launcher, a free program that lets you run scripts/executables remotely. You can download it from <a href="http://github.com/josephdadams/scriptlauncher">here</a>.',
 		},
 		{
 			type: 'textinput',

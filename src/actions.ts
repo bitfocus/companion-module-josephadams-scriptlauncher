@@ -15,8 +15,18 @@ export function UpdateActions(self: ScriptLauncherInstance): void {
 					default: 0,
 				},
 			],
+			callback: (action) => {
+				const delay = Number(action.options.delay)
+				self.socket.emit('shutdown', self.config.password, delay.toString())
+			},
+		},
+
+		shutdown_cancel: {
+			name: 'Cancel Shutdown',
+			description: 'Cancel a pending shutdown',
+			options: [],
 			callback: () => {
-				self.sendCommand('shutdown')
+				self.socket.emit('shutdown_cancel', self.config.password)
 			},
 		},
 
@@ -25,45 +35,9 @@ export function UpdateActions(self: ScriptLauncherInstance): void {
 			description: 'Reboot/Restart the computer',
 			options: [],
 			callback: () => {
-				self.sendCommand('reboot')
+				self.socket.emit('reboot', self.config.password)
 			},
 		},
-
-		/*getSystemInfo: {
-			name: 'Get System Info',
-			description: 'Get system information',
-			options: [],
-			callback: () => {
-				self.sendCommand('getSystemInfo')
-			},
-		},
-
-		checkDiskSpace: {
-			name: 'Check Disk Space',
-			description: 'Check disk space',
-			options: [],
-			callback: () => {
-				self.sendCommand('checkDiskSpace')
-			},
-		},
-
-		listProcesses: {
-			name: 'List Processes',
-			description: 'List processes',
-			options: [],
-			callback: () => {
-				self.sendCommand('listProcesses')
-			},
-		},
-
-		checkSystemLoad: {
-			name: 'Check System Load',
-			description: 'Check system load',
-			options: [],
-			callback: () => {
-				self.sendCommand('checkSystemLoad')
-			},
-		},*/
 
 		sendAlert: {
 			name: 'Send Alert',
@@ -77,7 +51,7 @@ export function UpdateActions(self: ScriptLauncherInstance): void {
 				},
 			],
 			callback: (action) => {
-				self.sendCommand('sendAlert', String(action.options.message))
+				self.socket.emit('sendAlert', self.config.password, String(action.options.message))
 			},
 		},
 
@@ -103,7 +77,7 @@ export function UpdateActions(self: ScriptLauncherInstance): void {
 			callback: async (action) => {
 				const executable = await self.parseVariablesInString(String(action.options.executable))
 				const command = await self.parseVariablesInString(String(action.options.command))
-				self.sendExecute(executable, command)
+				self.socket.emit(executable, self.config.password, command)
 			},
 		},
 	})

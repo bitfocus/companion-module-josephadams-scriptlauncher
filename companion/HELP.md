@@ -13,6 +13,7 @@ You can download it from: http://github.com/josephdadams/scriptlauncher
 ## Actions
 
 - Shutdown
+- Cancel Shutdown
 - Reboot
 - Send Alert
 - Execute Custom Script
@@ -22,5 +23,11 @@ You can download it from: http://github.com/josephdadams/scriptlauncher
 ## Variables
 
 - Connection State
+
+The program also monitors system information of the computer running ScriptLauncher, so you also have these:
+
+- CPU Manufacturer / Brand / Speed / Cores
+- Memory Total / Free / Used / Active / Available
+- Network Interface(s) Name, IP, MAC, Speed, etc.
 
 ## Presets

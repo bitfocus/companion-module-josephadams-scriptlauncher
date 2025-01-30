@@ -3,7 +3,7 @@ import { GetConfigFields, type ModuleConfig } from './config.js'
 import { UpgradeScripts } from './upgrades.js'
 import { UpdateActions } from './actions.js'
 import { UpdateVariableDefinitions } from './variables.js'
-import { InitConnection, SendCommand, SendExecute } from './api.js'
+import { InitConnection } from './api.js'
 
 import type { Socket } from 'socket.io-client'
 
@@ -11,12 +11,39 @@ export class ScriptLauncherInstance extends InstanceBase<ModuleConfig> {
 	config!: ModuleConfig // Setup in init()
 	socket!: Socket
 	connected = false
+	systemInfo!: systemInfo
 
 	constructor(internal: unknown) {
 		super(internal)
 
 		this.socket as Socket
 		this.connected as boolean
+		this.systemInfo as systemInfo
+
+		this.systemInfo = {
+			cpu: {
+				manufacturer: '',
+				brand: '',
+				speed: 0,
+				cores: 0,
+			},
+			currentLoad: {
+				avgLoad: 0,
+				currentLoad: 0,
+				currentLoadUser: 0,
+				currentLoadSystem: 0,
+				currentLoadIdle: 0,
+			},
+			memory: {
+				total: 0,
+				free: 0,
+				used: 0,
+				active: 0,
+				available: 0,
+			},
+			networkInterfaces: [],
+			networkStats: [],
+		}
 	}
 
 	async init(config: ModuleConfig): Promise<void> {
@@ -52,14 +79,6 @@ export class ScriptLauncherInstance extends InstanceBase<ModuleConfig> {
 
 	async initConnection(): Promise<void> {
 		await InitConnection(this)
-	}
-
-	async sendCommand(command: string, args?: string): Promise<void> {
-		await SendCommand(this, command, args)
-	}
-
-	async sendExecute(executable: string, command: string): Promise<void> {
-		await SendExecute(this, executable, command)
 	}
 }
 
