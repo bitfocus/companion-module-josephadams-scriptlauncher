@@ -13,6 +13,13 @@ export function UpdateVariableDefinitions(self: ScriptLauncherInstance): void {
 	variables.push({ variableId: 'cpu_speed', name: 'CPU Speed' })
 	variables.push({ variableId: 'cpu_cores', name: 'CPU Cores' })
 
+	//System Info Variables - Current Load
+	variables.push({ variableId: 'cpu_load_avg', name: 'CPU Avg Load' })
+	variables.push({ variableId: 'cpu_load_current', name: 'CPU Current Load' })
+	variables.push({ variableId: 'cpu_load_user', name: 'CPU Current Load User' })
+	variables.push({ variableId: 'cpu_load_system', name: 'CPU Current Load System' })
+	variables.push({ variableId: 'cpu_load_idle', name: 'CPU Current Load Idle' })
+
 	//System Info Variables - Memory
 	variables.push({ variableId: 'memory_total', name: 'Memory Total' })
 	variables.push({ variableId: 'memory_free', name: 'Memory Free' })

@@ -24,9 +24,9 @@ You can download it from: http://github.com/josephdadams/scriptlauncher
 
 - Connection State
 
-The program also monitors system information of the computer running ScriptLauncher, so you also have these:
+The program also monitors system information of the computer running ScriptLauncher, so you have these variables available as well:
 
-- CPU Manufacturer / Brand / Speed / Cores
+- CPU Manufacturer / Brand / Speed / Cores / Load
 - Memory Total / Free / Used / Active / Available
 - Network Interface(s) Name, IP, MAC, Speed, etc.
 
