@@ -39,18 +39,20 @@ export async function InitConnection(self: ScriptLauncherInstance): Promise<void
 	})
 
 	self.socket.on('command_result', (result: string) => {
-		self.log('info', `Command result: ${result}`)
+		if (self.config.verbose) {
+			self.log('debug', `Command result: ${result}`)
+		}		
 	})
 
 	self.socket.on('system_info', (systemInfo) => {
-		console.log('System Info:', systemInfo)
-
 		processSystemInfo(self, systemInfo)
 	})
 }
 
 function processSystemInfo(self: ScriptLauncherInstance, systemInfo: any): void {
-	console.log('System Info:', systemInfo)
+	if (self.config.verbose) {
+		self.log('debug', `System Info: ${JSON.stringify(systemInfo)}`)
+	}
 
 	try {
 		//only update if first time or if different than current systemInfo
