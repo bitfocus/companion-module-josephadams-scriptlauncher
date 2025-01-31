@@ -77,7 +77,7 @@ export function UpdateActions(self: ScriptLauncherInstance): void {
 			callback: async (action) => {
 				const executable = await self.parseVariablesInString(String(action.options.executable))
 				const command = await self.parseVariablesInString(String(action.options.command))
-				self.socket.emit(executable, self.config.password, command)
+				self.socket.emit('execute', executable, command, self.config.password, )
 			},
 		},
 	})
