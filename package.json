@@ -9,10 +9,7 @@
 		"package": "run build && companion-module-build",
 		"build": "rimraf dist && run build:main",
 		"build:main": "tsc -p tsconfig.build.json",
-		"dev": "tsc -p tsconfig.build.json --watch",
-		"lint:raw": "biome check",
-		"lint:raw:unsafe": "biome check --fix --unsafe",
-		"lint": "biome check"
+		"dev": "tsc -p tsconfig.build.json --watch"
 	},
 	"license": "MIT",
 	"repository": {
