@@ -39,9 +39,18 @@ export function UpdateActions(self: ScriptLauncherInstance): void {
 			},
 		},
 
+		lock: {
+			name: 'Lock Computer',
+			description: 'Lock the computer',
+			options: [],
+			callback: () => {
+				self.socket.emit('lock', self.config.password)
+			},
+		},
+
 		sendAlert: {
 			name: 'Send Alert',
-			description: 'Send an alert',
+			description: 'Send an alert or notification to the computer',
 			options: [
 				{
 					type: 'textinput',
@@ -64,20 +73,28 @@ export function UpdateActions(self: ScriptLauncherInstance): void {
 					label: 'Executable',
 					id: 'executable',
 					default: '',
-					tooltip: 'Path to the executable like node, python, ps, etc.',
+					tooltip: 'Path to the executable',
 				},
 				{
 					type: 'textinput',
-					label: 'Command',
-					id: 'command',
+					label: 'Arguments',
+					id: 'args',
 					default: '',
-					tooltip: 'Command to execute',
+					tooltip: 'Arguments to the executable',
+				},
+				{
+					type: 'textinput',
+					label: 'Input',
+					id: 'stdin',
+					default: '',
+					tooltip: 'Input to write to STDIN',
 				},
 			],
 			callback: async (action) => {
 				const executable = await self.parseVariablesInString(String(action.options.executable))
-				const command = await self.parseVariablesInString(String(action.options.command))
-				self.socket.emit('execute', executable, command, self.config.password, )
+				const args = await self.parseVariablesInString(String(action.options.args))
+				const stdin = await self.parseVariablesInString(String(action.options.stdin))
+				self.socket.emit('execute', executable, args, stdin, self.config.password)
 			},
 		},
 	})
