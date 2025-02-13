@@ -97,5 +97,23 @@ export function UpdateActions(self: ScriptLauncherInstance): void {
 				self.socket.emit('execute', executable, args, stdin, self.config.password)
 			},
 		},
+
+		stopSystemInfo: {
+			name: 'Stop System Information',
+			description: 'Stop the system information service',
+			options: [],
+			callback: () => {
+				self.socket.emit('stopSystemInfo')
+			}
+		},
+
+		startSystemInfo: {
+			name: 'Start System Information',
+			description: 'Start the system information service',
+			options: [],
+			callback: () => {
+				self.socket.emit('startSystemInfo')
+			}
+		},
 	})
 }
