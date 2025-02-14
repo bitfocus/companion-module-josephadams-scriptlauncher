@@ -41,7 +41,7 @@ export async function InitConnection(self: ScriptLauncherInstance): Promise<void
 	self.socket.on('command_result', (result: string) => {
 		if (self.config.verbose) {
 			self.log('debug', `Command result: ${result}`)
-		}		
+		}
 	})
 
 	self.socket.on('system_info', (systemInfo) => {

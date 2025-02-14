@@ -10,14 +10,14 @@ import type { Socket } from 'socket.io-client'
 export class ScriptLauncherInstance extends InstanceBase<ModuleConfig> {
 	config!: ModuleConfig // Setup in init()
 	socket!: Socket
-	connected = false
+	connected: boolean = false
 	systemInfo!: systemInfo
+	systemInfoVariablesOn: boolean = false
 
 	constructor(internal: unknown) {
 		super(internal)
 
 		this.socket as Socket
-		this.connected as boolean
 		this.systemInfo as systemInfo
 
 		this.systemInfo = {
