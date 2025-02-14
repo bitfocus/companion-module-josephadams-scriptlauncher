@@ -115,7 +115,7 @@ export function UpdateActions(self: ScriptLauncherInstance): void {
 			options: [],
 			callback: () => {
 				self.socket.emit('startSystemInfo')
-				self.systemInfoVariablesOn = false
+				self.systemInfoVariablesOn = true
 				self.updateVariableDefinitions()
 			},
 		},
