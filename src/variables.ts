@@ -7,6 +7,8 @@ export function UpdateVariableDefinitions(self: ScriptLauncherInstance): void {
 
 	variables.push({ variableId: 'connected', name: 'Connected to ScriptLauncher' })
 
+	variables.push({ variableId: 'platform', name: 'Platform / OS' })
+
 	if (self.systemInfoVariablesOn === true) {
 		//System Info Variables - CPU
 		variables.push({ variableId: 'cpu_manufacturer', name: 'CPU Manufacturer' })

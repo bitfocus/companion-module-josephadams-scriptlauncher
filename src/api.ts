@@ -47,6 +47,18 @@ export async function InitConnection(self: ScriptLauncherInstance): Promise<void
 	self.socket.on('system_info', (systemInfo) => {
 		processSystemInfo(self, systemInfo)
 	})
+
+	self.socket.on('platform', (platform) => {
+		if (self.config.verbose) {
+			self.log('debug', `Platform: ${platform}`)
+		}
+		//if platform is 'darwin', set platform to 'mac'
+		if (platform == 'darwin') {
+			platform = 'mac'
+		}
+		//set platform variable
+		self.setVariableValues({ platform: platform })
+	})
 }
 
 function processSystemInfo(self: ScriptLauncherInstance, systemInfo: any): void {

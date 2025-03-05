@@ -119,5 +119,37 @@ export function UpdateActions(self: ScriptLauncherInstance): void {
 				self.updateVariableDefinitions()
 			},
 		},
+
+		moveFile: {
+			name: 'Rename or Move File',
+			description: 'Rename or Move a File by providing the full source path and the new full destination path.',
+			options: [
+				{
+					type: 'textinput',
+					label: 'Source Path',
+					id: 'sourcePath',
+					default: '',
+				},
+				{
+					type: 'textinput',
+					label: 'Destination Path',
+					id: 'destPath',
+					default: '',
+				},
+				{
+					type: 'checkbox',
+					label: 'Copy Only',
+					id: 'copyOnly',
+					default: false,
+					tooltip: 'If checked, the file will only be copied instead of moved',
+				},
+			],
+			callback: async (action) => {
+				const sourcePath = await self.parseVariablesInString(String(action.options.sourcePath))
+				const destPath = await self.parseVariablesInString(String(action.options.destPath))
+				const copyOnly = action.options.copyOnly ? true : false
+				self.socket.emit('moveFile', sourcePath, destPath, copyOnly, self.config.password)
+			},
+		},
 	})
 }
