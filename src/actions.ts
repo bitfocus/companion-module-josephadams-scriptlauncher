@@ -129,12 +129,14 @@ export function UpdateActions(self: ScriptLauncherInstance): void {
 					label: 'Source Path',
 					id: 'sourcePath',
 					default: '',
+					useVariables: true,
 				},
 				{
 					type: 'textinput',
 					label: 'Destination Path',
 					id: 'destPath',
 					default: '',
+					useVariables: true,
 				},
 				{
 					type: 'checkbox',
@@ -149,6 +151,61 @@ export function UpdateActions(self: ScriptLauncherInstance): void {
 				const destPath = await self.parseVariablesInString(String(action.options.destPath))
 				const copyOnly = action.options.copyOnly ? true : false
 				self.socket.emit('moveFile', sourcePath, destPath, copyOnly, self.config.password)
+			},
+		},
+
+		moveDatedFileInFolder: {
+			name: 'Move Dated File in Folder',
+			description:
+				"Move a file in a folder based on the file's creation date. You can select the newest or oldest file.",
+			options: [
+				{
+					type: 'textinput',
+					label: 'Source Folder Path',
+					id: 'sourceFolderPath',
+					default: '',
+					useVariables: true,
+				},
+				{
+					type: 'dropdown',
+					label: 'Newest or Oldest File',
+					id: 'newestOrOldest',
+					default: 'newest',
+					choices: [
+						{ id: 'newest', label: 'Newest File' },
+						{ id: 'oldest', label: 'Oldest File' },
+					],
+				},
+				{
+					type: 'textinput',
+					label: 'Destination Folder Path',
+					id: 'destFolderPath',
+					default: '',
+					useVariables: true,
+				},
+				{
+					type: 'textinput',
+					label: 'Destination File Name',
+					id: 'fileName',
+					default: '',
+					tooltip:
+						'The name of the file in the destination folder. You can leave it empty to keep the original name. If you don\t specify a file extension, the original file extension will be kept.',
+					useVariables: true,
+				},
+			],
+			callback: async (action) => {
+				const sourceFolderPath = await self.parseVariablesInString(String(action.options.sourceFolderPath))
+				const newestOrOldest = String(action.options.newestOrOldest)
+				const destFolderPath = await self.parseVariablesInString(String(action.options.destFolderPath))
+				const fileName = await self.parseVariablesInString(String(action.options.fileName))
+				self.socket.emit(
+					'moveDatedFileInFolder',
+					sourceFolderPath,
+					newestOrOldest,
+					destFolderPath,
+					fileName,
+					self.config.password,
+				)
 			},
 		},
 	})
