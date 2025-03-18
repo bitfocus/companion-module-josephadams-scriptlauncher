@@ -208,5 +208,74 @@ export function UpdateActions(self: ScriptLauncherInstance): void {
 				)
 			},
 		},
+
+		moveDatedFileInFolderWithExtension: {
+			name: 'Move Dated File in Folder (Specify Extension)',
+			description:
+				"Move a file in a folder based on the file's creation date. You can select the newest or oldest file.",
+			options: [
+				{
+					type: 'textinput',
+					label: 'Source Folder Path',
+					id: 'sourceFolderPath',
+					default: '',
+					useVariables: true,
+				},
+				{
+					type: 'dropdown',
+					label: 'Newest or Oldest File',
+					id: 'newestOrOldest',
+					default: 'newest',
+					choices: [
+						{ id: 'newest', label: 'Newest File' },
+						{ id: 'oldest', label: 'Oldest File' },
+					],
+				},
+				{
+					type: 'textinput',
+					label: 'File Extension',
+					id: 'fileExtension',
+					default: '.mp4',
+					tooltip: 'File extension to filter by (e.g., .txt, .jpg)',
+					useVariables: true,
+				},
+				{
+					type: 'textinput',
+					label: 'Destination Folder Path',
+					id: 'destFolderPath',
+					default: '',
+					useVariables: true,
+				},
+				{
+					type: 'textinput',
+					label: 'Destination File Name',
+					id: 'fileName',
+					default: '',
+					tooltip:
+						'The name of the file in the destination folder. You can leave it empty to keep the original name. If you don\t specify a file extension, the original file extension will be kept.',
+					useVariables: true,
+				},
+			],
+			callback: async (action) => {
+				const sourceFolderPath = await self.parseVariablesInString(String(action.options.sourceFolderPath))
+				const newestOrOldest = String(action.options.newestOrOldest)
+				let fileExtension = await self.parseVariablesInString(String(action.options.fileExtension))
+				//make sure extension starts with a dot
+				if (!fileExtension.startsWith('.')) {
+					fileExtension = '.' + fileExtension
+				}
+				const destFolderPath = await self.parseVariablesInString(String(action.options.destFolderPath))
+				const fileName = await self.parseVariablesInString(String(action.options.fileName))
+				self.socket.emit(
+					'moveDatedFileInFolderWithExtension',
+					sourceFolderPath,
+					newestOrOldest,
+					fileExtension,
+					destFolderPath,
+					fileName,
+					self.config.password,
+				)
+			},
+		},
 	})
 }
