@@ -64,6 +64,14 @@ export function UpdateVariableDefinitions(self: ScriptLauncherInstance): void {
 		})
 	}
 
+	// Add Fonts variable
+	if (self.fonts && self.fonts.length > 0) {
+		variables.push({
+			variableId: 'fonts',
+			name: 'Available Fonts',
+		})
+	}
+
 	self.setVariableDefinitions(variables)
 }
 

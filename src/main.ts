@@ -13,6 +13,7 @@ export class ScriptLauncherInstance extends InstanceBase<ModuleConfig> {
 	connected: boolean = false
 	systemInfo!: systemInfo
 	systemInfoVariablesOn: boolean = false
+	fonts: string[] = [] // Array to hold font names
 
 	constructor(internal: unknown) {
 		super(internal)

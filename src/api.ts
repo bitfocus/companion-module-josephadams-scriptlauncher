@@ -59,6 +59,21 @@ export async function InitConnection(self: ScriptLauncherInstance): Promise<void
 		//set platform variable
 		self.setVariableValues({ platform: platform })
 	})
+
+	self.socket.on('fonts', (fonts: string[]) => {
+		if (self.config.verbose) {
+			self.log('debug', `Fonts: ${JSON.stringify(fonts)}`)
+		}
+		// Update font variable definitions
+		self.fonts = fonts || []
+
+		UpdateVariableDefinitions(self)
+		
+		self.setVariableValues({
+			fonts: JSON.stringify(self.fonts), // Store fonts as a JSON string
+		})
+
+	})
 }
 
 function processSystemInfo(self: ScriptLauncherInstance, systemInfo: any): void {
