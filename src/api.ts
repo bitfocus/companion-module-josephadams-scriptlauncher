@@ -68,11 +68,10 @@ export async function InitConnection(self: ScriptLauncherInstance): Promise<void
 		self.fonts = fonts || []
 
 		UpdateVariableDefinitions(self)
-		
+
 		self.setVariableValues({
 			fonts: JSON.stringify(self.fonts), // Store fonts as a JSON string
 		})
-
 	})
 }
 

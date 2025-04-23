@@ -280,8 +280,7 @@ export function UpdateActions(self: ScriptLauncherInstance): void {
 
 		moveFileBasedOnSize: {
 			name: 'Move File(s) Based on Size',
-			description:
-				"Move a file(s) in a folder based on the file's size. You can specify the threshold size.",
+			description: "Move a file(s) in a folder based on the file's size. You can specify the threshold size.",
 			options: [
 				{
 					type: 'textinput',
@@ -337,15 +336,16 @@ export function UpdateActions(self: ScriptLauncherInstance): void {
 					id: 'destFolderPathLarger',
 					default: '',
 					useVariables: true,
-					isVisible: (options) => (options.moveLargerThanThreshold == true && options.selectBySize == true), // Only show if moveLargerThanThreshold is checked
+					isVisible: (options) => options.moveLargerThanThreshold == true && options.selectBySize == true, // Only show if moveLargerThanThreshold is checked
 				},
 				{
 					type: 'checkbox',
 					label: 'Select Newest or Oldest File within Size Threshold (for Files Larger than Threshold)',
 					id: 'selectNewestOrOldestLarger',
 					default: true,
-					tooltip: 'If checked, you can choose to move only the newest or oldest file that meets the size threshold. Otherwise all files meeting the criteria will be moved.',
-					isVisible: (options) => (options.moveLargerThanThreshold == true && options.selectBySize == true), // Only show if moveLargerThanThreshold is checked
+					tooltip:
+						'If checked, you can choose to move only the newest or oldest file that meets the size threshold. Otherwise all files meeting the criteria will be moved.',
+					isVisible: (options) => options.moveLargerThanThreshold == true && options.selectBySize == true, // Only show if moveLargerThanThreshold is checked
 				},
 				{
 					type: 'dropdown',
@@ -356,7 +356,10 @@ export function UpdateActions(self: ScriptLauncherInstance): void {
 						{ id: 'newest', label: 'Newest File' },
 						{ id: 'oldest', label: 'Oldest File' },
 					],
-					isVisible: (options) => (options.moveLargerThanThreshold == true && options.selectNewestOrOldestLarger === true && options.selectBySize === true), // Only show if selectNewestOrOldestLarger is checked
+					isVisible: (options) =>
+						options.moveLargerThanThreshold == true &&
+						options.selectNewestOrOldestLarger === true &&
+						options.selectBySize === true, // Only show if selectNewestOrOldestLarger is checked
 				},
 				{
 					type: 'textinput',
@@ -366,7 +369,10 @@ export function UpdateActions(self: ScriptLauncherInstance): void {
 					tooltip:
 						'The name of the file in the destination folder. You can leave it empty to keep the original name. If you don\t specify a file extension, the original file extension will be kept.',
 					useVariables: true,
-					isVisible: (options) => (options.moveLargerThanThreshold == true && options.selectNewestOrOldestLarger === true && options.selectBySize === true), // Only show if moveLargerThanThreshold is checked
+					isVisible: (options) =>
+						options.moveLargerThanThreshold == true &&
+						options.selectNewestOrOldestLarger === true &&
+						options.selectBySize === true, // Only show if moveLargerThanThreshold is checked
 				},
 				{
 					type: 'checkbox',
@@ -382,7 +388,7 @@ export function UpdateActions(self: ScriptLauncherInstance): void {
 					id: 'destFolderPathSmaller',
 					default: '',
 					useVariables: true,
-					isVisible: (options) => (options.moveSmallerThanThreshold == true && options.selectBySize === true), // Only show if moveLargerThanThreshold is checked
+					isVisible: (options) => options.moveSmallerThanThreshold == true && options.selectBySize === true, // Only show if moveLargerThanThreshold is checked
 				},
 				{
 					type: 'checkbox',
@@ -401,7 +407,10 @@ export function UpdateActions(self: ScriptLauncherInstance): void {
 						{ id: 'newest', label: 'Newest File' },
 						{ id: 'oldest', label: 'Oldest File' },
 					],
-					isVisible: (options) => (options.moveSmallerThanThreshold == true && options.selectNewestOrOldestSmaller === true && options.selectBySize === true), // Only show if selectNewestOrOldestLarger is checked
+					isVisible: (options) =>
+						options.moveSmallerThanThreshold == true &&
+						options.selectNewestOrOldestSmaller === true &&
+						options.selectBySize === true, // Only show if selectNewestOrOldestLarger is checked
 				},
 				{
 					type: 'textinput',
@@ -411,7 +420,10 @@ export function UpdateActions(self: ScriptLauncherInstance): void {
 					tooltip:
 						'The name of the file in the destination folder. You can leave it empty to keep the original name. If you don\t specify a file extension, the original file extension will be kept.',
 					useVariables: true,
-					isVisible: (options) => (options.moveSmallerThanThreshold == true && options.selectNewestOrOldestSmaller === true && options.selectBySize === true), // Only show if moveLargerThanThreshold is checked
+					isVisible: (options) =>
+						options.moveSmallerThanThreshold == true &&
+						options.selectNewestOrOldestSmaller === true &&
+						options.selectBySize === true, // Only show if moveLargerThanThreshold is checked
 				},
 				{
 					type: 'textinput',
@@ -419,9 +431,8 @@ export function UpdateActions(self: ScriptLauncherInstance): void {
 					id: 'destFolderPath',
 					default: '',
 					useVariables: true,
-					isVisible: (options) => (options.selectBySize === false), // Only show if moveLargerThanThreshold is checked
+					isVisible: (options) => options.selectBySize === false, // Only show if moveLargerThanThreshold is checked
 				},
-				
 			],
 			callback: async (action) => {
 				const moveObj: any = {}
@@ -469,9 +480,6 @@ export function UpdateActions(self: ScriptLauncherInstance): void {
 							moveObj.fileNameLarger = fileNameLarger
 						}
 					}
-					
-					
-					
 
 					const moveSmallerThanThreshold = action.options.moveSmallerThanThreshold ? true : false
 					let destFolderPathSmaller = ''
@@ -489,18 +497,13 @@ export function UpdateActions(self: ScriptLauncherInstance): void {
 							moveObj.fileNameSmaller = fileNameSmaller
 						}
 					}
-				}
-				else {
+				} else {
 					const destFolderPath = await self.parseVariablesInString(String(action.options.destFolderPath))
 					moveObj.destFolderPath = destFolderPath
 					moveObj.selectBySize = false
 				}
 
-				self.socket.emit(
-					'moveFileBasedOnSize',
-					moveObj,
-					self.config.password
-				)
+				self.socket.emit('moveFileBasedOnSize', moveObj, self.config.password)
 			},
 		},
 
