@@ -56,6 +56,9 @@ export async function InitConnection(self: ScriptLauncherInstance): Promise<void
 		if (platform == 'darwin') {
 			platform = 'mac'
 		}
+		else if (platform == 'win32') {
+			platform = 'windows'
+		}
 		//set platform variable
 		self.setVariableValues({ platform: platform })
 	})
