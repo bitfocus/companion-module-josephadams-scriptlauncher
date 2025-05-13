@@ -117,6 +117,16 @@ function processCommandResult(self: ScriptLauncherInstance, obj: any): void {
 				self.log('debug', `Quit App: ${JSON.stringify(obj.result)}`)
 			}
 			break
+		case 'runScript':
+			if (self.config.verbose) {
+				self.log('debug', `Run Script: ${JSON.stringify(obj.result)}`)
+			}
+			break
+		case 'sendInput':
+			if (self.config.verbose) {
+				self.log('debug', `Send Input: ${JSON.stringify(obj.result)}`)
+			}
+			break
 		default:
 			self.log('error', `Unknown command result: ${obj.command}`)
 			break
