@@ -83,7 +83,7 @@ export function UpdateActions(self: ScriptLauncherInstance): void {
 			],
 			callback: (action) => {
 				const obj = {} as any
-				obj.command = 'alert'
+				obj.command = 'sendAlert'
 				obj.password = self.config.password
 				obj.message = action.options.message
 				self.socket.emit('command', obj)
@@ -121,11 +121,17 @@ export function UpdateActions(self: ScriptLauncherInstance): void {
 				const args = await self.parseVariablesInString(String(action.options.args))
 				const stdin = await self.parseVariablesInString(String(action.options.stdin))
 
+				//take the args and split them into an array by spaces, and if there aren't any, just create an empty array
+				let argsArray: string[] = []
+				if (args.length > 0) {
+					argsArray = args.split(' ')
+				}
+
 				const obj = {} as any
-				obj.command = 'execute'
+				obj.command = 'runScript'
 				obj.password = self.config.password
 				obj.executable = executable
-				obj.args = args
+				obj.args = argsArray
 				obj.stdin = stdin
 				self.socket.emit('command', obj)
 			},
