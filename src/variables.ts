@@ -7,7 +7,12 @@ export function UpdateVariableDefinitions(self: ScriptLauncherInstance): void {
 
 	variables.push({ variableId: 'connected', name: 'Connected to ScriptLauncher' })
 
+	variables.push({ variableId: 'version', name: 'Version' })
 	variables.push({ variableId: 'platform', name: 'Platform / OS' })
+	variables.push({ variableId: 'arch', name: 'Architecture' })
+	variables.push({ variableId: 'hostname', name: 'Hostname' })
+
+	variables.push({ variableId: 'uptime', name: 'Uptime' })
 
 	if (self.systemInfoVariablesOn === true) {
 		//System Info Variables - CPU

@@ -38,44 +38,101 @@ export async function InitConnection(self: ScriptLauncherInstance): Promise<void
 		CheckVariables(self)
 	})
 
-	self.socket.on('command_result', (result: string) => {
-		if (self.config.verbose) {
-			self.log('debug', `Command result: ${result}`)
+	self.socket.on('command_result', (obj: any) => {
+		try {
+			if (obj && obj.command && obj.result) {
+				processCommandResult(self, obj)
+			} else if (obj && obj.command && obj.error) {
+				self.log('error', `Error from ScriptLauncher: ${obj.command}: ${obj.error}`)
+			} else {
+				self.log('error', `Invalid command result: ${JSON.stringify(obj)}`)
+			}
+		} catch (error) {
+			self.log('error', `Error processing command result: ${error}`)
 		}
 	})
+}
 
-	self.socket.on('system_info', (systemInfo) => {
-		processSystemInfo(self, systemInfo)
-	})
+function processCommandResult(self: ScriptLauncherInstance, obj: any): void {
+	//if obj.error is not empty, log it
+	if (obj.error) {
+		self.log('error', `Error from ScriptLauncher: ${obj.command}: ${obj.error}`)
+		self.updateStatus(InstanceStatus.UnknownError)
+		return
+	}
 
-	self.socket.on('platform', (platform) => {
-		if (self.config.verbose) {
-			self.log('debug', `Platform: ${platform}`)
-		}
-		//if platform is 'darwin', set platform to 'mac'
-		if (platform == 'darwin') {
-			platform = 'mac'
-		}
-		else if (platform == 'win32') {
-			platform = 'windows'
-		}
-		//set platform variable
-		self.setVariableValues({ platform: platform })
-	})
+	switch (obj.command) {
+		case 'platform':
+			let platform = obj.result.platform
+			//if platform is 'darwin', set platform to 'mac'
+			if (platform == 'darwin') {
+				platform = 'mac'
+			} else if (platform == 'win32') {
+				//if platform is 'win32', set platform to 'windows'
+				platform = 'windows'
+			}
 
-	self.socket.on('fonts', (fonts: string[]) => {
-		if (self.config.verbose) {
-			self.log('debug', `Fonts: ${JSON.stringify(fonts)}`)
-		}
-		// Update font variable definitions
-		self.fonts = fonts || []
+			if (self.config.verbose) {
+				self.log('debug', `Platform: ${platform}`)
+				self.log('debug', `Version: ${obj.result.version}`)
+				self.log('debug', `Arch: ${obj.result.arch}`)
+				self.log('debug', `Hostname: ${obj.result.hostname}`)
+			}
+
+			//set platform variables
+			let variableObj = {
+				platform: platform,
+				version: obj.result.version,
+				arch: obj.result.arch,
+				hostname: obj.result.hostname,
+			}
+			self.setVariableValues(variableObj)
+
+			break
+		case 'uptime':
+			self.setVariableValues({
+				uptime: obj.result.uptime,
+			})
+			break
+		case 'getSystemInfo':
+			if (self.config.verbose) {
+				self.log('debug', `System Info: ${JSON.stringify(obj.result)}`)
+			}
+			processSystemInfo(self, obj.result)
+			break
+		case 'getFonts':
+			self.fonts = obj.result || []
+			UpdateVariableDefinitions(self)
+			self.setVariableValues({
+				fonts: JSON.stringify(self.fonts), // Store fonts as a JSON string
+			})
+			break
+		case 'focusApp':
+			if (self.config.verbose) {
+				self.log('debug', `Focus App: ${JSON.stringify(obj.result)}`)
+			}
+			break
+		case 'quitApp':
+			if (self.config.verbose) {
+				self.log('debug', `Quit App: ${JSON.stringify(obj.result)}`)
+			}
+			break
+		default:
+			self.log('error', `Unknown command result: ${obj.command}`)
+			break
+	}
+
+	if (obj.command == 'getSystemInfo') {
+		processSystemInfo(self, obj.result)
+	} else if (obj.command == 'getFonts') {
+		self.fonts = obj.result || []
 
 		UpdateVariableDefinitions(self)
 
 		self.setVariableValues({
 			fonts: JSON.stringify(self.fonts), // Store fonts as a JSON string
 		})
-	})
+	}
 }
 
 function processSystemInfo(self: ScriptLauncherInstance, systemInfo: any): void {
@@ -200,4 +257,24 @@ function processSystemInfo(self: ScriptLauncherInstance, systemInfo: any): void 
 	} catch (error) {
 		self.log('error', `Error processing system info: ${error}`)
 	}
+}
+
+export function emitAppleScript(self: ScriptLauncherInstance, script: string) {
+	self.socket.emit('command', {
+		command: 'runScript',
+		password: self.config.password,
+		executable: 'osascript',
+		args: ['-e', script],
+		stdin: '',
+	})
+}
+
+export function emitShellCommand(self: ScriptLauncherInstance, command: string) {
+	self.socket.emit('command', {
+		command: 'runScript',
+		password: self.config.password,
+		executable: '/bin/sh',
+		args: ['-c', command],
+		stdin: '',
+	})
 }
