@@ -1281,5 +1281,68 @@ export function UpdateActions(self: ScriptLauncherInstance): void {
 				emitShellCommand(self, captureCommand)
 			},
 		},
+
+		macKillDock: {
+			name: 'Mac: Restart Dock',
+			description: 'Restarts the Dock application.',
+			options: [],
+			callback: async () => {
+				emitShellCommand(self, 'killall Dock')
+			}
+		},
+		macKillFinder: {
+			name: 'Mac: Restart Finder',
+			description: 'Restarts the Finder application.',
+			options: [],
+			callback: async () => {
+				emitShellCommand(self, 'killall Finder')
+			}
+		},
+		macKillSystemUIServer: {
+			name: 'Mac: Restart SystemUIServer (Menu Bar)',
+			description: 'Restarts the SystemUIServer application.',
+			options: [],
+			callback: async () => {
+				emitShellCommand(self, 'killall SystemUIServer')
+			}
+		},
+		macForceKillApp: {
+			name: 'Mac: Force Kill Application',
+			description: 'Force kills an application by name.',
+			options: [
+				{
+					type: 'textinput',
+					label: 'Application Name',
+					id: 'appName',
+					default: '',
+					tooltip: 'Name of the application to force kill',
+					useVariables: true,
+				},
+			],
+			callback: async (action) => {
+				const appName = await self.parseVariablesInString(String(action.options.appName))
+				if (appName.trim()) {
+					emitShellCommand(self, `killall "${appName}"`)
+				} else {
+					self.log('warn', 'No application name provided to kill')
+				}
+			}
+		},
+		macKillCoreAudio: {
+			name: 'Mac: Restart CoreAudio',
+			description: 'Restarts the CoreAudio service.',
+			options: [],
+			callback: async () => {
+				emitShellCommand(self, 'sudo killall coreaudiod')
+			}
+		},
+		macLogout: {
+			name: 'Mac: Logout',
+			description: 'Logs out the current user.',
+			options: [],
+			callback: async () => {
+				emitShellCommand(self, 'killall loginwindow')
+			}
+		},
 	})
 }
