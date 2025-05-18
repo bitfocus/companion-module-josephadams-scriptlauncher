@@ -133,7 +133,7 @@ function processCommandResult(self: ScriptLauncherInstance, obj: any): void {
 			}
 			break
 		default:
-			self.log('error', `Unknown command result: ${obj.command}`)
+			self.log('warn', `Unknown command result: ${obj.command}`)
 			break
 	}
 
