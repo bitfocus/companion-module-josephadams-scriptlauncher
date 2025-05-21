@@ -74,7 +74,7 @@ This module communicates with ScriptLauncher — a free local automation tool yo
 - **Mac: Restart Finder**
 - **Mac: Restart SystemUIServer (Menu Bar)**
 - **Mac: Force Kill App**
-- **Mac: Restart CoureAudio**
+- **Mac: Restart CoreAudio**
 - **Mac: Logout**
 
 > 🧠 Most macOS utilities use native AppleScript or shell commands and do not require any additional setup.
