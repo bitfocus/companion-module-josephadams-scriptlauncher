@@ -14,6 +14,7 @@ export class ScriptLauncherInstance extends InstanceBase<ModuleConfig> {
 	systemInfo!: systemInfo
 	systemInfoVariablesOn: boolean = false
 	fonts: string[] = [] // Array to hold font names
+	platform: string = '' // Variable to hold the platform name
 
 	constructor(internal: unknown) {
 		super(internal)

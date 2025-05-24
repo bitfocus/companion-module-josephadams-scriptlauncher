@@ -72,6 +72,8 @@ function processCommandResult(self: ScriptLauncherInstance, obj: any): void {
 				platform = 'windows'
 			}
 
+			self.platform = platform
+
 			if (self.config.verbose) {
 				self.log('debug', `Platform: ${platform}`)
 				self.log('debug', `Version: ${obj.result.version}`)
