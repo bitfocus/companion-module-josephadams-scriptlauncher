@@ -1345,24 +1345,24 @@ export function UpdateActions(self: ScriptLauncherInstance): void {
 			},
 		},
 		macChangeWallpaper: {
-	name: 'Mac: Change Wallpaper',
-	description: 'Set the desktop wallpaper for all monitors.',
-	options: [
-		{
-			id: 'filePath',
-			label: 'Image Path',
-			type: 'textinput',
-			default: '/Users/joseph/Pictures/wallpaper.jpg',
-			tooltip: 'Full path to the image file',
-			useVariables: true,
+			name: 'Mac: Change Wallpaper',
+			description: 'Set the desktop wallpaper for all monitors.',
+			options: [
+				{
+					id: 'filePath',
+					label: 'Image Path',
+					type: 'textinput',
+					default: '/Users/joseph/Pictures/wallpaper.jpg',
+					tooltip: 'Full path to the image file',
+					useVariables: true,
+				},
+			],
+			callback: async (action) => {
+				const filePath = await self.parseVariablesInString(String(action.options.filePath))
+				const applescript = `tell application "System Events" to set picture of every desktop to "${filePath}"`
+				emitAppleScript(self, applescript)
+			},
 		},
-	],
-	callback: async (action) => {
-		const filePath = await self.parseVariablesInString(String(action.options.filePath))
-		const applescript = `tell application "System Events" to set picture of every desktop to "${filePath}"`
-		emitAppleScript(self, applescript)
-	},
-},
 
 		//deep link uri actions
 		openDeepLink: {
@@ -1466,7 +1466,8 @@ export function UpdateActions(self: ScriptLauncherInstance): void {
 
 		openSlackChannel: {
 			name: 'Open Slack Channel',
-			description: 'Opens a Slack channel by Team ID and channel ID. You can find these IDs by using Slack in the browser and looking at the URL.',
+			description:
+				'Opens a Slack channel by Team ID and channel ID. You can find these IDs by using Slack in the browser and looking at the URL.',
 			options: [
 				{ id: 'workspace', type: 'textinput', label: 'Team ID (T...)', default: 'yourworkspace.slack.com' },
 				{ id: 'channel', type: 'textinput', label: 'Channel ID (C...)', default: '' },
@@ -1539,6 +1540,152 @@ export function UpdateActions(self: ScriptLauncherInstance): void {
 				if (port) {
 					uri += `:${port}`
 				}
+				emitShellCommand(self, `open "${uri}"`)
+			},
+		},
+
+		openWhatsAppChat: {
+			name: 'Open WhatsApp Chat',
+			description: 'Open a WhatsApp chat with a specific phone number.',
+			options: [
+				{ id: 'phone', type: 'textinput', label: 'Phone Number (E.164 format)', default: '+1234567890' },
+				{ id: 'text', type: 'textinput', label: 'Message (optional)', default: '' },
+			],
+			callback: async (action) => {
+				const phone = await self.parseVariablesInString(String(action.options.phone))
+				const text = encodeURIComponent(await self.parseVariablesInString(String(action.options.text)))
+				const uri = `whatsapp://send?phone=${phone}${text ? `&text=${text}` : ''}`
+				emitShellCommand(self, `open "${uri}"`)
+			},
+		},
+
+		openSkypeChat: {
+			name: 'Open Skype Chat',
+			description: 'Start a Skype chat with a username.',
+			options: [{ id: 'username', type: 'textinput', label: 'Skype Username', default: '' }],
+			callback: async (action) => {
+				const username = await self.parseVariablesInString(String(action.options.username))
+				const uri = `skype:${username}?chat`
+				emitShellCommand(self, `open "${uri}"`)
+			},
+		},
+
+		openTelegramChat: {
+			name: 'Open Telegram Chat',
+			description: 'Open a Telegram chat by username.',
+			options: [{ id: 'username', type: 'textinput', label: 'Telegram Username', default: '' }],
+			callback: async (action) => {
+				const username = await self.parseVariablesInString(String(action.options.username))
+				const uri = `tg://resolve?domain=${username}`
+				emitShellCommand(self, `open "${uri}"`)
+			},
+		},
+
+		openGoogleMeet: {
+			name: 'Start Google Meet',
+			description: 'Opens a new Google Meet session in the browser.',
+			options: [],
+			callback: async () => {
+				const uri = `https://meet.google.com/new`
+				emitShellCommand(self, `open "${uri}"`)
+			},
+		},
+
+		openSpotifyTrack: {
+			name: 'Spotify: Open Track',
+			description: 'Opens a specific Spotify track in the app.',
+			options: [{ id: 'trackId', type: 'textinput', label: 'Spotify Track ID', default: '' }],
+			callback: async (action) => {
+				const trackId = await self.parseVariablesInString(String(action.options.trackId))
+				const uri = `spotify:track:${trackId}`
+				emitShellCommand(self, `open "${uri}"`)
+			},
+		},
+
+		openSpotifyAlbum: {
+			name: 'Spotify: Open Album',
+			description: 'Opens a specific Spotify album in the app.',
+			options: [{ id: 'albumId', type: 'textinput', label: 'Spotify Album ID', default: '' }],
+			callback: async (action) => {
+				const albumId = await self.parseVariablesInString(String(action.options.albumId))
+				const uri = `spotify:album:${albumId}`
+				emitShellCommand(self, `open "${uri}"`)
+			},
+		},
+
+		openSpotifyArtist: {
+			name: 'Spotify: Open Artist',
+			description: 'Opens a specific Spotify artist page.',
+			options: [{ id: 'artistId', type: 'textinput', label: 'Spotify Artist ID', default: '' }],
+			callback: async (action) => {
+				const artistId = await self.parseVariablesInString(String(action.options.artistId))
+				const uri = `spotify:artist:${artistId}`
+				emitShellCommand(self, `open "${uri}"`)
+			},
+		},
+
+		openSpotifyPlaylist: {
+			name: 'Spotify: Open Playlist',
+			description: 'Opens a specific Spotify playlist.',
+			options: [{ id: 'playlistId', type: 'textinput', label: 'Spotify Playlist ID', default: '' }],
+			callback: async (action) => {
+				const playlistId = await self.parseVariablesInString(String(action.options.playlistId))
+				const uri = `spotify:playlist:${playlistId}`
+				emitShellCommand(self, `open "${uri}"`)
+			},
+		},
+
+		openSpotifySearch: {
+			name: 'Spotify: Search',
+			description: 'Performs a search in the Spotify app.',
+			options: [{ id: 'query', type: 'textinput', label: 'Search Query', default: 'Daft Punk' }],
+			callback: async (action) => {
+				const query = encodeURIComponent(await self.parseVariablesInString(String(action.options.query)))
+				const uri = `spotify:search:${query}`
+				emitShellCommand(self, `open "${uri}"`)
+			},
+		},
+
+		openSpotifyShow: {
+			name: 'Spotify: Open Show',
+			description: 'Opens a specific Spotify podcast show.',
+			options: [{ id: 'showId', type: 'textinput', label: 'Spotify Show ID', default: '' }],
+			callback: async (action) => {
+				const showId = await self.parseVariablesInString(String(action.options.showId))
+				const uri = `spotify:show:${showId}`
+				emitShellCommand(self, `open "${uri}"`)
+			},
+		},
+
+		openSpotifyEpisode: {
+			name: 'Spotify: Open Episode',
+			description: 'Opens a specific Spotify podcast episode.',
+			options: [{ id: 'episodeId', type: 'textinput', label: 'Spotify Episode ID', default: '' }],
+			callback: async (action) => {
+				const episodeId = await self.parseVariablesInString(String(action.options.episodeId))
+				const uri = `spotify:episode:${episodeId}`
+				emitShellCommand(self, `open "${uri}"`)
+			},
+		},
+
+		openYouTubeVideo: {
+			name: 'Play YouTube Video',
+			description: 'Opens a specific YouTube video in the browser.',
+			options: [{ id: 'videoId', type: 'textinput', label: 'YouTube Video ID', default: '' }],
+			callback: async (action) => {
+				const videoId = await self.parseVariablesInString(String(action.options.videoId))
+				const uri = `https://www.youtube.com/watch?v=${videoId}`
+				emitShellCommand(self, `open "${uri}"`)
+			},
+		},
+
+		openAppleMusicTrack: {
+			name: 'Play Apple Music Track',
+			description: 'Opens an Apple Music track in the Music app.',
+			options: [{ id: 'trackId', type: 'textinput', label: 'Apple Music Track ID', default: '' }],
+			callback: async (action) => {
+				const trackId = await self.parseVariablesInString(String(action.options.trackId))
+				const uri = `music://track/${trackId}`
 				emitShellCommand(self, `open "${uri}"`)
 			},
 		},
