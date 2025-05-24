@@ -1288,7 +1288,7 @@ export function UpdateActions(self: ScriptLauncherInstance): void {
 			options: [],
 			callback: async () => {
 				emitShellCommand(self, 'killall Dock')
-			}
+			},
 		},
 		macKillFinder: {
 			name: 'Mac: Restart Finder',
@@ -1296,7 +1296,7 @@ export function UpdateActions(self: ScriptLauncherInstance): void {
 			options: [],
 			callback: async () => {
 				emitShellCommand(self, 'killall Finder')
-			}
+			},
 		},
 		macKillSystemUIServer: {
 			name: 'Mac: Restart SystemUIServer (Menu Bar)',
@@ -1304,7 +1304,7 @@ export function UpdateActions(self: ScriptLauncherInstance): void {
 			options: [],
 			callback: async () => {
 				emitShellCommand(self, 'killall SystemUIServer')
-			}
+			},
 		},
 		macForceKillApp: {
 			name: 'Mac: Force Kill Application',
@@ -1326,7 +1326,7 @@ export function UpdateActions(self: ScriptLauncherInstance): void {
 				} else {
 					self.log('warn', 'No application name provided to kill')
 				}
-			}
+			},
 		},
 		macKillCoreAudio: {
 			name: 'Mac: Restart CoreAudio',
@@ -1334,7 +1334,7 @@ export function UpdateActions(self: ScriptLauncherInstance): void {
 			options: [],
 			callback: async () => {
 				emitShellCommand(self, 'sudo killall coreaudiod')
-			}
+			},
 		},
 		macLogout: {
 			name: 'Mac: Logout',
@@ -1342,7 +1342,205 @@ export function UpdateActions(self: ScriptLauncherInstance): void {
 			options: [],
 			callback: async () => {
 				emitShellCommand(self, 'killall loginwindow')
-			}
+			},
+		},
+		macChangeWallpaper: {
+	name: 'Mac: Change Wallpaper',
+	description: 'Set the desktop wallpaper for all monitors.',
+	options: [
+		{
+			id: 'filePath',
+			label: 'Image Path',
+			type: 'textinput',
+			default: '/Users/joseph/Pictures/wallpaper.jpg',
+			tooltip: 'Full path to the image file',
+			useVariables: true,
+		},
+	],
+	callback: async (action) => {
+		const filePath = await self.parseVariablesInString(String(action.options.filePath))
+		const applescript = `tell application "System Events" to set picture of every desktop to "${filePath}"`
+		emitAppleScript(self, applescript)
+	},
+},
+
+		//deep link uri actions
+		openDeepLink: {
+			name: 'Open Deep Link / URI',
+			description: 'Opens a URI or deep link using the system default handler (e.g., st-business://)',
+			options: [
+				{
+					type: 'textinput',
+					id: 'uri',
+					label: 'Deep Link URI',
+					default: '',
+					tooltip: 'Enter the full URI (e.g., st-business://...)',
+				},
+			],
+			callback: async (action) => {
+				const uri = await self.parseVariablesInString(String(action.options.uri))
+				const cmd = self.platform === 'mac' ? `open "${uri}"` : `start "" "${uri}"`
+
+				emitShellCommand(self, cmd)
+			},
+		},
+		openSplashtopConnection: {
+			name: 'Open Splashtop Connection',
+			description: 'Opens a Splashtop connection using the specified parameters.',
+			options: [
+				{
+					type: 'textinput',
+					id: 'email',
+					label: 'Email Address',
+					default: '',
+					tooltip: 'Email address associated with the Splashtop account',
+					useVariables: true,
+				},
+				{
+					type: 'textinput',
+					id: 'mac',
+					label: 'Mac Address',
+					default: '',
+					tooltip: 'MAC address of the target device',
+					useVariables: true,
+				},
+			],
+			callback: async (action) => {
+				const email = await self.parseVariablesInString(String(action.options.email))
+				let mac = await self.parseVariablesInString(String(action.options.mac))
+
+				if (email && mac) {
+					//remove any spaces or colons from the MAC address
+					mac = mac.replace(/[:\s]/g, '')
+					// Check if the MAC address is valid (6 pairs of hex digits)
+					const macRegex = /^[0-9A-Fa-f]{12}$/
+					if (!macRegex.test(mac)) {
+						self.log('warn', 'Invalid MAC address format. Please provide a valid MAC address.')
+						return
+					}
+					const uri = `st-business://com.splashtop.business?account=${email}&mac=${mac}`
+					const cmd = self.platform === 'mac' ? `open "${uri}"` : `start "" "${uri}"`
+					emitShellCommand(self, cmd)
+				} else {
+					self.log('warn', 'Email or MAC address not provided')
+				}
+			},
+		},
+
+		zoomJoinMeeting: {
+			name: 'Join Zoom Meeting',
+			description: 'Opens Zoom and joins the specified meeting.',
+			options: [
+				{ id: 'meetingId', type: 'textinput', label: 'Meeting ID', default: '' },
+				{ id: 'passcode', type: 'textinput', label: 'Passcode', default: '' },
+			],
+			callback: async (action) => {
+				const meetingId = await self.parseVariablesInString(String(action.options.meetingId))
+				const passcode = await self.parseVariablesInString(String(action.options.passcode))
+				const uri = `zoommtg://zoom.us/join?confno=${meetingId}&pwd=${passcode}`
+				emitShellCommand(self, `open "${uri}"`)
+			},
+		},
+
+		openTeamsChat: {
+			name: 'Open Teams Chat',
+			description: 'Opens a Microsoft Teams chat by email.',
+			options: [{ id: 'email', type: 'textinput', label: 'Email Address', default: '' }],
+			callback: async (action) => {
+				const email = await self.parseVariablesInString(String(action.options.email))
+				const uri = `msteams://teams.microsoft.com/l/chat/0/0?users=${email}`
+				emitShellCommand(self, `open "${uri}"`)
+			},
+		},
+
+		facetimeCall: {
+			name: 'Mac: Start FaceTime Call',
+			description: 'Starts a FaceTime call to a phone number or Apple ID.',
+			options: [{ id: 'target', type: 'textinput', label: 'Phone or Email', default: '' }],
+			callback: async (action) => {
+				const target = await self.parseVariablesInString(String(action.options.target))
+				const uri = `facetime://${target}`
+				emitShellCommand(self, `open "${uri}"`)
+			},
+		},
+
+		openSlackChannel: {
+			name: 'Open Slack Channel',
+			description: 'Opens a Slack channel by Team ID and channel ID. You can find these IDs by using Slack in the browser and looking at the URL.',
+			options: [
+				{ id: 'workspace', type: 'textinput', label: 'Team ID (T...)', default: 'yourworkspace.slack.com' },
+				{ id: 'channel', type: 'textinput', label: 'Channel ID (C...)', default: '' },
+			],
+			callback: async (action) => {
+				const workspace = await self.parseVariablesInString(String(action.options.workspace))
+				const channel = await self.parseVariablesInString(String(action.options.channel))
+				const uri = `slack://channel?team=${workspace}&id=${channel}`
+				emitShellCommand(self, `open "${uri}"`)
+			},
+		},
+
+		composeEmail: {
+			name: 'Compose Email',
+			description: 'Opens default email app with a prefilled message.',
+			options: [
+				{ id: 'to', type: 'textinput', label: 'To', default: '' },
+				{ id: 'subject', type: 'textinput', label: 'Subject', default: '' },
+				{ id: 'body', type: 'textinput', label: 'Body', default: '' },
+			],
+			callback: async (action) => {
+				const to = await self.parseVariablesInString(String(action.options.to))
+				const subject = encodeURIComponent(await self.parseVariablesInString(String(action.options.subject)))
+				const body = encodeURIComponent(await self.parseVariablesInString(String(action.options.body)))
+				const uri = `mailto:${to}?subject=${subject}&body=${body}`
+				emitShellCommand(self, `open "${uri}"`)
+			},
+		},
+
+		openFileOrFolder: {
+			name: 'Open File or Folder',
+			description: 'Opens a local file or folder using the system default application.',
+			options: [
+				{
+					id: 'path',
+					type: 'textinput',
+					label: 'File or Folder Path',
+					default: '',
+					tooltip: 'Enter a full system path or file:// URI',
+				},
+			],
+			callback: async (action) => {
+				let path = await self.parseVariablesInString(String(action.options.path))
+				if (!path.startsWith('file://') && !path.startsWith('/')) {
+					self.log('warn', 'Invalid path. It should start with file:// or /')
+					return
+				}
+				if (!path.startsWith('file://')) {
+					path = `file://${path}`
+				}
+				emitShellCommand(self, `open "${path}"`)
+			},
+		},
+
+		openVncConnection: {
+			name: 'Open VNC Connection',
+			description: 'Opens a VNC connection to the specified host.',
+			options: [
+				{ id: 'host', type: 'textinput', label: 'Host (IP or Hostname)', default: '' },
+				{ id: 'port', type: 'textinput', label: 'Port (optional)', default: '' },
+			],
+			callback: async (action) => {
+				const host = await self.parseVariablesInString(String(action.options.host))
+				const port = await self.parseVariablesInString(String(action.options.port))
+				if (!host) {
+					self.log('warn', 'Host is required')
+					return
+				}
+				let uri = `vnc://${host}`
+				if (port) {
+					uri += `:${port}`
+				}
+				emitShellCommand(self, `open "${uri}"`)
+			},
 		},
 	})
 }

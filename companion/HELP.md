@@ -76,8 +76,21 @@ This module communicates with ScriptLauncher — a free local automation tool yo
 - **Mac: Force Kill App**
 - **Mac: Restart CoreAudio**
 - **Mac: Logout**
+- **Mac: Change Wallpaper**
 
 > 🧠 Most macOS utilities use native AppleScript or shell commands and do not require any additional setup.
+
+## Deep Link / URI Actions
+
+- **Open Deep Link / URI:** Open any URI (e.g., st-business://, zoommtg://, slack://, etc.) using the system default handler.
+- **Open Splashtop Connection:** Open a Splashtop session for a specific machine using your account email and the machine’s MAC address.
+- **Join Zoom Meeting:** Launch Zoom and join a meeting with ID and optional passcode.
+- **Open Teams Chat:** Open a Microsoft Teams chat by email address.
+- **Start FaceTime Call:** Initiate a FaceTime call to a phone number or Apple ID.
+- **Open Slack Channel:** Open a Slack channel by workspace and channel ID.
+- **Compose Email:** Open the default mail client to compose a new email with optional recipient, subject, and body pre-filled.
+- **Open File or Folder:** Open a local file or folder using the system’s default application.
+- **Open VNC Connection:** Open a VNC connection to a specified host and port.
 
 ---
 
