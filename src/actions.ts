@@ -1410,8 +1410,8 @@ export function UpdateActions(self: ScriptLauncherInstance): void {
 				let mac = await self.parseVariablesInString(String(action.options.mac))
 
 				if (email && mac) {
-					//remove any spaces or colons from the MAC address
-					mac = mac.replace(/[:\s]/g, '')
+					//remove any spaces, colons, or dashes from the MAC address
+					mac = mac.replace(/[\s:-]/g, '')
 					// Check if the MAC address is valid (6 pairs of hex digits)
 					const macRegex = /^[0-9A-Fa-f]{12}$/
 					if (!macRegex.test(mac)) {
