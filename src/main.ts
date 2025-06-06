@@ -2,6 +2,7 @@ import { InstanceBase, runEntrypoint, type SomeCompanionConfigField } from '@com
 import { GetConfigFields, type ModuleConfig } from './config.js'
 import { UpgradeScripts } from './upgrades.js'
 import { UpdateActions } from './actions.js'
+import { UpdateFeedbacks } from './feedbacks.js'
 import { UpdateVariableDefinitions } from './variables.js'
 import { InitConnection } from './api.js'
 
@@ -16,6 +17,10 @@ export class ScriptLauncherInstance extends InstanceBase<ModuleConfig> {
 	fonts: string[] = [] // Array to hold font names
 	platform: string = '' // Variable to hold the platform name
 
+	CHOICES_DISKS: { id: string; label: string }[] = [] // Choices for disks
+	CHOICES_FONTS: { id: string; label: string }[] = [] // Choices for fonts
+	CHOICES_NIC: { id: string; label: string }[] = [] // Choices for network interfaces
+
 	constructor(internal: unknown) {
 		super(internal)
 
@@ -29,12 +34,23 @@ export class ScriptLauncherInstance extends InstanceBase<ModuleConfig> {
 				speed: 0,
 				cores: 0,
 			},
+			cpuTemp: {
+				main: null,
+				max: null,
+				cores: [],
+				socket: [],
+			},
 			currentLoad: {
 				avgLoad: 0,
 				currentLoad: 0,
 				currentLoadUser: 0,
 				currentLoadSystem: 0,
 				currentLoadIdle: 0,
+			},
+			disks: [],
+			gpu: {
+				controllers: [],
+				displays: [],
 			},
 			memory: {
 				total: 0,
@@ -46,11 +62,18 @@ export class ScriptLauncherInstance extends InstanceBase<ModuleConfig> {
 			networkInterfaces: [],
 			networkStats: [],
 		}
+
+		//set default CHOICES_DISKS
+		this.CHOICES_DISKS = [{ id: 'none', label: 'None Available' }]
+
+		//set default CHOICES_NIC
+		this.CHOICES_NIC = [{ id: 'none', label: 'None Available' }]
 	}
 
 	async init(config: ModuleConfig): Promise<void> {
 		this.config = config
 		this.updateActions() // export actions
+		this.updateFeedbacks() // export feedbacks
 		this.updateVariableDefinitions() // export variable definitions
 
 		await this.initConnection()
@@ -73,6 +96,10 @@ export class ScriptLauncherInstance extends InstanceBase<ModuleConfig> {
 
 	updateActions(): void {
 		UpdateActions(this)
+	}
+
+	updateFeedbacks(): void {
+		UpdateFeedbacks(this)
 	}
 
 	updateVariableDefinitions(): void {

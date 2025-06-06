@@ -105,6 +105,7 @@ function processCommandResult(self: ScriptLauncherInstance, obj: any): void {
 		case 'getFonts':
 			self.fonts = obj.result || []
 			UpdateVariableDefinitions(self)
+			buildFontChoices(self)
 			self.setVariableValues({
 				fonts: JSON.stringify(self.fonts), // Store fonts as a JSON string
 			})
@@ -135,20 +136,8 @@ function processCommandResult(self: ScriptLauncherInstance, obj: any): void {
 			}
 			break
 		default:
-			self.log('warn', `Unknown command result: ${obj.command}`)
+			self.log('debug', `Unknown command result: ${obj.command}`)
 			break
-	}
-
-	if (obj.command == 'getSystemInfo') {
-		processSystemInfo(self, obj.result)
-	} else if (obj.command == 'getFonts') {
-		self.fonts = obj.result || []
-
-		UpdateVariableDefinitions(self)
-
-		self.setVariableValues({
-			fonts: JSON.stringify(self.fonts), // Store fonts as a JSON string
-		})
 	}
 }
 
@@ -175,6 +164,21 @@ function processSystemInfo(self: ScriptLauncherInstance, systemInfo: any): void 
 			})
 		}
 
+		//update CPU temperature if available
+		if (systemInfo.cpuTemp) {
+			self.systemInfo.cpuTemp = {
+				main: systemInfo.cpuTemp.main || null,
+				max: systemInfo.cpuTemp.max || null,
+				cores: systemInfo.cpuTemp.cores || [],
+				socket: systemInfo.cpuTemp.socket || [],
+				chipset: systemInfo.cpuTemp.chipset || null,
+			}
+
+			self.setVariableValues({
+				cpu_temp: self.systemInfo.cpuTemp?.main != null ? self.systemInfo.cpuTemp.main.toFixed(1) : 'Unavailable',
+			})
+		}
+
 		if (systemInfo.currentLoad) {
 			self.systemInfo.currentLoad = {
 				avgLoad: systemInfo.currentLoad.avgLoad || 0,
@@ -194,6 +198,7 @@ function processSystemInfo(self: ScriptLauncherInstance, systemInfo: any): void 
 			})
 		}
 
+		//Memory Info
 		self.systemInfo.memory.total = systemInfo.memory.total || 0
 		self.systemInfo.memory.free = systemInfo.memory.free || 0
 		self.systemInfo.memory.used = systemInfo.memory.used || 0
@@ -201,19 +206,71 @@ function processSystemInfo(self: ScriptLauncherInstance, systemInfo: any): void 
 		self.systemInfo.memory.available = systemInfo.memory.available || 0
 
 		self.setVariableValues({
-			memory_total: self.systemInfo.memory.total,
-			memory_free: self.systemInfo.memory.free,
-			memory_used: self.systemInfo.memory.used,
-			memory_active: self.systemInfo.memory.active,
-			memory_available: self.systemInfo.memory.available,
+			memory_total: formatBytes(self.systemInfo.memory.total),
+			memory_free: formatBytes(self.systemInfo.memory.free),
+			memory_used: formatBytes(self.systemInfo.memory.used),
+			memory_active: formatBytes(self.systemInfo.memory.active),
+			memory_available: formatBytes(self.systemInfo.memory.available),
 		})
 
-		//see if systeminfo.networkInterfaces length is different than current, and rebuild variables if so
-		if (systemInfo && systemInfo.networkInterfaces && systemInfo.networkInterfaces.length > 0) {
-			if (self.systemInfo.networkInterfaces.length != systemInfo.networkInterfaces.length) {
-				self.systemInfo.networkInterfaces = systemInfo.networkInterfaces
-				UpdateVariableDefinitions(self)
+		// Disk Info
+		if (systemInfo.fsSize && Array.isArray(systemInfo.fsSize)) {
+			self.systemInfo.disks = systemInfo.fsSize
+			self.systemInfo.disks = self.systemInfo.disks?.filter((disk) => isRealVolume(disk, self.platform))
+
+			buildDiskChoices(self)
+
+			self.systemInfo.disks.forEach((disk: any, index: number) => {
+				const safeId = getSafeDiskId(disk.mount, index)
+
+				self.setVariableValues({
+					[`disk_${safeId}_mount`]: disk.mount,
+					[`disk_${safeId}_fs`]: disk.fs,
+					[`disk_${safeId}_type`]: disk.type,
+					[`disk_${safeId}_size`]: formatBytes(disk.size),
+					[`disk_${safeId}_used`]: formatBytes(disk.used),
+					[`disk_${safeId}_available`]: formatBytes(disk.available),
+					[`disk_${safeId}_use_percent`]: `${disk.use?.toFixed(1) ?? '?'}%`,
+				})
+			})
+
+			
+		}
+
+		// GPU info
+		if (systemInfo.gpu) {
+			self.systemInfo.gpu = {
+				controllers: systemInfo.gpu.controllers || [],
+				displays: systemInfo.gpu.displays || [],
 			}
+
+			// For now, we’ll just expose first controller as variables
+			const gpu = self.systemInfo.gpu.controllers[0]
+			if (gpu) {
+				self.setVariableValues({
+					gpu_vendor: gpu.vendor || 'Unknown',
+					gpu_model: gpu.model || 'Unknown',
+					gpu_vram: gpu.vram != null ? gpu.vram : 'Unknown',
+					gpu_bus: gpu.bus || 'Unknown',
+					gpu_cores: gpu.cores || 'Unknown',
+				})
+
+				// If utilization is available (e.g., NVIDIA), include it
+				if (gpu.utilizationGpu != null) {
+					self.setVariableValues({
+						gpu_utilization: gpu.utilizationGpu.toFixed(1),
+					})
+				} else {
+					self.setVariableValues({
+						gpu_utilization: 'Unavailable',
+					})
+				}
+			}
+		}
+
+		//Network Info
+		if (systemInfo && systemInfo.networkInterfaces && systemInfo.networkInterfaces.length > 0) {
+			buildNICChoices(self)
 
 			self.systemInfo.networkInterfaces.forEach((nic) => {
 				self.setVariableValues({
@@ -241,7 +298,7 @@ function processSystemInfo(self: ScriptLauncherInstance, systemInfo: any): void 
 			const oldStats = self.systemInfo.networkStats || []
 			self.systemInfo.networkStats = systemInfo.networkStats
 
-			self.systemInfo.networkStats.forEach((nic) => {
+			self.systemInfo.networkStats.forEach((nic: any) => {
 				const oldNic = oldStats.find((x) => x.iface == nic.iface)
 				if (oldNic) {
 					const seconds = 5
@@ -256,6 +313,13 @@ function processSystemInfo(self: ScriptLauncherInstance, systemInfo: any): void 
 					nic.tx_sec_mb = 0
 				}
 
+				if (nic.speed && nic.speed > 0) {
+					const nicSpeedBytesPerSec = (nic.speed * 1_000_000) / 8 // Mbps to Bytes/sec
+					nic.utilization = ((nic.rx_sec + nic.tx_sec) / nicSpeedBytesPerSec) * 100
+				} else {
+					nic.utilization = 0
+				}
+
 				self.setVariableValues({
 					[`nic_${nic.iface}_rx_bytes`]: nic.rx_bytes,
 					[`nic_${nic.iface}_rx_errors`]: nic.rx_errors,
@@ -268,12 +332,148 @@ function processSystemInfo(self: ScriptLauncherInstance, systemInfo: any): void 
 
 					[`nic_${nic.iface}_rx_sec_mb`]: nic.rx_sec_mb,
 					[`nic_${nic.iface}_tx_sec_mb`]: nic.tx_sec_mb,
+
+					[`nic_${nic.iface}_utilization`]: nic.utilization.toFixed(2),
 				})
 			})
 		}
+
+		self.checkFeedbacks()
 	} catch (error) {
 		self.log('error', `Error processing system info: ${error}`)
 	}
+}
+
+export function isRealVolume(disk: { mount: string; fs: string }, platform: string): boolean {
+	const mount = disk.mount || ''
+
+	if (platform === 'mac') {
+		// Keep root, Data, and user-mounts like /Volumes/...
+		if (mount === '/' || mount === '/System/Volumes/Data') return true
+		if (mount.startsWith('/Volumes/')) return true
+		return false
+	} else if (platform === 'windows') {
+		// Keep C:, D:, etc.
+		return /^[A-Z]:\\?$/i.test(mount)
+	} else {
+		// For Linux or other: basic heuristic
+		return mount === '/' || mount.startsWith('/mnt') || mount.startsWith('/media')
+	}
+}
+
+export function getSafeDiskId(mount: string, index: number): string {
+	if (mount === '/') return 'root'
+	if (mount.toLowerCase().includes('data')) return 'data'
+	if (mount.toLowerCase().includes('vm')) return 'vm'
+	if (mount.toLowerCase().includes('preboot')) return 'preboot'
+	if (mount.toLowerCase().includes('update')) return 'update'
+	if (mount.toLowerCase().includes('hardware')) return 'hardware'
+	if (mount.toLowerCase().includes('xarts')) return 'xarts'
+	if (mount.toLowerCase().includes('iscpreboot')) return 'iscpreboot'
+
+	// fallback to shorter generic ID like vol1, vol2
+	return `vol${index + 1}`
+}
+
+function formatBytes(bytes: number): string {
+	if (bytes === 0) return '0 Bytes'
+	const sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB']
+	const i = Math.floor(Math.log(bytes) / Math.log(1024))
+	const formatted = bytes / Math.pow(1024, i)
+	return `${formatted.toFixed(1)} ${sizes[i]}`
+}
+
+function buildDiskChoices(self: ScriptLauncherInstance): void {
+	const diskChoices: { id: string; label: string }[] = []
+
+	if (self.systemInfo.disks && Array.isArray(self.systemInfo.disks)) {
+		self.systemInfo.disks.forEach((disk: any, index: number) => {
+			const safeId = getSafeDiskId(disk.mount, index)
+			const label = `${disk.mount} (${disk.fs}`
+			diskChoices.push({
+				id: safeId,
+				label,
+			})
+		})
+	}
+
+	if (diskChoices.length === 0) {
+		diskChoices.push({
+			id: '/',
+			label: '/ (default)',
+		})
+	}
+
+	diskChoices.sort((a, b) => a.label.localeCompare(b.label))
+
+	//compare to existing choices and only update if different
+	if (JSON.stringify(self.CHOICES_DISKS) === JSON.stringify(diskChoices)) {
+		return // no change needed
+	}
+
+	self.CHOICES_DISKS = diskChoices
+	self.updateActions() // update actions to include disk choices
+	self.updateFeedbacks() // update feedbacks to include disk choices
+	UpdateVariableDefinitions(self)
+}
+
+function buildFontChoices(self: ScriptLauncherInstance): void {
+	const fontChoices: { id: string; label: string }[] = []
+	if (self.fonts && self.fonts.length > 0) {
+		self.fonts.forEach((font) => {
+			fontChoices.push({
+				id: font,
+				label: font,
+			})
+		})
+	} else {
+		fontChoices.push({
+			id: 'none',
+			label: 'No Fonts Available',
+		})
+	}
+
+	fontChoices.sort((a, b) => a.label.localeCompare(b.label))
+
+	//compare to existing choices and only update if different
+	if (JSON.stringify(self.CHOICES_FONTS) === JSON.stringify(fontChoices)) {
+		return // no change needed
+	}
+
+	self.CHOICES_FONTS = fontChoices
+	self.updateActions() // update actions to include font choices
+	self.updateFeedbacks() // update feedbacks to include font choices
+	UpdateVariableDefinitions(self)
+}
+
+function buildNICChoices(self: ScriptLauncherInstance): void {
+	const nicChoices: { id: string; label: string }[] = []
+	self.systemInfo.networkInterfaces.forEach((nic) => {
+		nicChoices.push({
+			id: nic.iface,
+			label: `${nic.iface} (${nic.ifaceName}) - ${nic.ip4 || nic.ip6 || 'No IP'}`,
+		})
+	})
+
+	nicChoices.sort((a, b) => a.label.localeCompare(b.label))
+
+	//if nicChoices.length == 0, add a default option
+	if (nicChoices.length == 0) {
+		nicChoices.push({
+			id: 'none',
+			label: 'No Network Interfaces Found',
+		})
+	}
+
+	//compare to existing choices and only update if different
+	if (JSON.stringify(self.CHOICES_NIC) === JSON.stringify(nicChoices)) {
+		return // no change needed
+	}
+
+	self.CHOICES_NIC = nicChoices
+	self.updateActions() // update actions to include NIC choices
+	self.updateFeedbacks() // update feedbacks to include NIC choices
+	UpdateVariableDefinitions(self)
 }
 
 export function emitAppleScript(self: ScriptLauncherInstance, script: string) {

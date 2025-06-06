@@ -112,9 +112,13 @@ This module communicates with ScriptLauncher — a free local automation tool yo
 
 ## Feedbacks
 
-Currently not implemented — but future support may include:
-
-- Script completion feedback
+- "X" Font is Installed
+- CPU Load
+- CPU Temp (⚠️ Note: CPU Temperature is not available on Apple Silicon Macs.)
+- Disk Usage
+- GPU Load (⚠️ Note: GPU Load is not available on all computers.)
+- Memory Usage
+- Network Interface Utilization/Load
 
 ---
 
