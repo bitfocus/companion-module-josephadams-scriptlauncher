@@ -166,7 +166,7 @@ export function UpdateActions(self: ScriptLauncherInstance): void {
 		},
 
 		moveFile: {
-			name: 'Rename or Move File',
+			name: 'File Actions | Rename or Move File',
 			description: 'Rename or Move a File by providing the full source path and the new full destination path.',
 			options: [
 				{
@@ -207,7 +207,7 @@ export function UpdateActions(self: ScriptLauncherInstance): void {
 		},
 
 		moveDatedFileInFolder: {
-			name: 'Move Dated File in Folder',
+			name: 'File Actions | Move Dated File in Folder',
 			description:
 				"Move a file in a folder based on the file's creation date. You can select the newest or oldest file.",
 			options: [
@@ -244,12 +244,20 @@ export function UpdateActions(self: ScriptLauncherInstance): void {
 						'The name of the file in the destination folder. You can leave it empty to keep the original name. If you don\t specify a file extension, the original file extension will be kept.',
 					useVariables: true,
 				},
+				{
+					type: 'checkbox',
+					label: 'Copy Only',
+					id: 'copyOnly',
+					default: false,
+					tooltip: 'If checked, the file will only be copied instead of moved',
+				},
 			],
 			callback: async (action) => {
 				const sourceFolderPath = await self.parseVariablesInString(String(action.options.sourceFolderPath))
 				const newestOrOldest = String(action.options.newestOrOldest)
 				const destFolderPath = await self.parseVariablesInString(String(action.options.destFolderPath))
 				const fileName = await self.parseVariablesInString(String(action.options.fileName))
+				const copyOnly = action.options.copyOnly ? true : false
 
 				const obj = {} as any
 				obj.command = 'moveDatedFileInFolder'
@@ -258,13 +266,14 @@ export function UpdateActions(self: ScriptLauncherInstance): void {
 				obj.newestOrOldest = newestOrOldest
 				obj.destFolderPath = destFolderPath
 				obj.fileName = fileName
+				obj.copyOnly = copyOnly
 
 				self.socket.emit('command', obj)
 			},
 		},
 
 		moveDatedFileInFolderWithExtension: {
-			name: 'Move Dated File in Folder (Specify Extension)',
+			name: 'File Actions | Move Dated File in Folder (Specify Extension)',
 			description:
 				"Move a file in a folder based on the file's creation date. You can select the newest or oldest file.",
 			options: [
@@ -309,6 +318,13 @@ export function UpdateActions(self: ScriptLauncherInstance): void {
 						'The name of the file in the destination folder. You can leave it empty to keep the original name. If you don\t specify a file extension, the original file extension will be kept.',
 					useVariables: true,
 				},
+				{
+					type: 'checkbox',
+					label: 'Copy Only',
+					id: 'copyOnly',
+					default: false,
+					tooltip: 'If checked, the file will only be copied instead of moved',
+				},
 			],
 			callback: async (action) => {
 				const sourceFolderPath = await self.parseVariablesInString(String(action.options.sourceFolderPath))
@@ -320,6 +336,7 @@ export function UpdateActions(self: ScriptLauncherInstance): void {
 				}
 				const destFolderPath = await self.parseVariablesInString(String(action.options.destFolderPath))
 				const fileName = await self.parseVariablesInString(String(action.options.fileName))
+				const copyOnly = action.options.copyOnly ? true : false
 
 				const obj = {} as any
 				obj.command = 'moveDatedFileInFolderWithExtension'
@@ -329,13 +346,14 @@ export function UpdateActions(self: ScriptLauncherInstance): void {
 				obj.fileExtension = fileExtension
 				obj.destFolderPath = destFolderPath
 				obj.fileName = fileName
+				obj.copyOnly = copyOnly
 
 				self.socket.emit('command', obj)
 			},
 		},
 
 		moveFileBasedOnSize: {
-			name: 'Move File(s) Based on Size',
+			name: 'File Actions | Move File(s) Based on Size',
 			description: "Move a file(s) in a folder based on the file's size. You can specify the threshold size.",
 			options: [
 				{
@@ -396,6 +414,14 @@ export function UpdateActions(self: ScriptLauncherInstance): void {
 				},
 				{
 					type: 'checkbox',
+					label: 'Copy Larger Files Only',
+					id: 'copyOnlyLarger',
+					default: false,
+					tooltip: 'If checked, the large files will only be copied instead of moved',
+					isVisible: (options) => options.moveLargerThanThreshold == true && options.selectBySize == true,
+				},
+				{
+					type: 'checkbox',
 					label: 'Select Newest or Oldest File within Size Threshold (for Files Larger than Threshold)',
 					id: 'selectNewestOrOldestLarger',
 					default: true,
@@ -445,6 +471,14 @@ export function UpdateActions(self: ScriptLauncherInstance): void {
 					default: '',
 					useVariables: true,
 					isVisible: (options) => options.moveSmallerThanThreshold == true && options.selectBySize === true, // Only show if moveLargerThanThreshold is checked
+				},
+				{
+					type: 'checkbox',
+					label: 'Copy Smaller Files Only',
+					id: 'copyOnlySmaller',
+					default: false,
+					tooltip: 'If checked, the small files will only be copied instead of moved',
+					isVisible: (options) => options.moveSmallerThanThreshold == true && options.selectBySize === true,
 				},
 				{
 					type: 'checkbox',
@@ -558,6 +592,10 @@ export function UpdateActions(self: ScriptLauncherInstance): void {
 					moveObj.destFolderPath = destFolderPath
 					moveObj.selectBySize = false
 				}
+
+				//Copy Only
+				const copyOnly = action.options.copyOnly ? true : false
+				moveObj.copyOnly = copyOnly
 
 				let obj = {} as any
 				obj.command = 'moveFileBasedOnSize'
@@ -804,7 +842,7 @@ export function UpdateActions(self: ScriptLauncherInstance): void {
 
 		//Mac Only Actions
 		macRunAppleScript: {
-			name: 'Mac: Run AppleScript',
+			name: 'Mac | Run AppleScript',
 			description: 'Run an AppleScript command',
 			options: [
 				{
@@ -824,7 +862,7 @@ export function UpdateActions(self: ScriptLauncherInstance): void {
 		},
 
 		macSetWindowBounds: {
-			name: 'Mac: Set Window Bounds',
+			name: 'Mac | Set Window Bounds',
 			description: 'Set the bounds of a window by providing the name of the application and the desired bounds.',
 			options: [
 				{
@@ -882,7 +920,7 @@ export function UpdateActions(self: ScriptLauncherInstance): void {
 		},
 
 		macSpeakText: {
-			name: 'Mac: Speak Text',
+			name: 'Mac | Speak Text',
 			description: 'Speak a text string using the Mac OS X text-to-speech engine',
 			options: [
 				{
@@ -1012,7 +1050,7 @@ export function UpdateActions(self: ScriptLauncherInstance): void {
 		},
 
 		macMinimizeFrontWindow: {
-			name: 'Mac: Minimize Front Window',
+			name: 'Mac | Minimize Front Window',
 			description: 'Minimizes the frontmost application window.',
 			options: [],
 			callback: async () => {
@@ -1021,7 +1059,7 @@ export function UpdateActions(self: ScriptLauncherInstance): void {
 		},
 
 		macHideAllApps: {
-			name: 'Mac: Hide All Applications',
+			name: 'Mac | Hide All Applications',
 			description: 'Simulates ⌥ + ⌘ + H to hide all but the front app.',
 			options: [],
 			callback: async () => {
@@ -1030,7 +1068,7 @@ export function UpdateActions(self: ScriptLauncherInstance): void {
 		},
 
 		macQuitAllAppsExceptFinder: {
-			name: 'Mac: Quit All Apps Except Finder',
+			name: 'Mac | Quit All Apps Except Finder',
 			description: 'Loops through open apps and quits them, skipping Finder.',
 			options: [],
 			callback: async () => {
@@ -1046,7 +1084,7 @@ export function UpdateActions(self: ScriptLauncherInstance): void {
 		},
 
 		macMuteToggle: {
-			name: 'Mac: Toggle Mute',
+			name: 'Mac | Toggle Mute',
 			description: 'Toggles the mute state of the system output volume.',
 			options: [],
 			callback: async () => {
@@ -1055,7 +1093,7 @@ export function UpdateActions(self: ScriptLauncherInstance): void {
 		},
 
 		macSetVolumeLevel: {
-			name: 'Mac: Set Volume Level',
+			name: 'Mac | Set Volume Level',
 			description: 'Sets the system output volume to a specific level (0–100).',
 			options: [
 				{
@@ -1073,7 +1111,7 @@ export function UpdateActions(self: ScriptLauncherInstance): void {
 		},
 
 		macVolumeUp: {
-			name: 'Mac: Volume Up',
+			name: 'Mac | Volume Up',
 			description: 'Increases the system volume.',
 			options: [
 				{
@@ -1095,7 +1133,7 @@ export function UpdateActions(self: ScriptLauncherInstance): void {
 		},
 
 		macVolumeDown: {
-			name: 'Mac: Volume Down',
+			name: 'Mac | Volume Down',
 			description: 'Decreases the system volume slightly.',
 			options: [
 				{
@@ -1117,7 +1155,7 @@ export function UpdateActions(self: ScriptLauncherInstance): void {
 		},
 
 		macSleep: {
-			name: 'Mac: Sleep Computer',
+			name: 'Mac | Sleep Computer',
 			description: 'Puts the Mac to sleep immediately.',
 			options: [],
 			callback: async () => {
@@ -1126,7 +1164,7 @@ export function UpdateActions(self: ScriptLauncherInstance): void {
 		},
 
 		macCreateNote: {
-			name: 'Mac: Create Note',
+			name: 'Mac | Create Note',
 			description: 'Creates a new note in the Notes app with custom title and body.',
 			options: [
 				{ id: 'title', type: 'textinput', label: 'Note Title', default: 'From ScriptLauncher' },
@@ -1143,7 +1181,7 @@ export function UpdateActions(self: ScriptLauncherInstance): void {
 		},
 
 		macOpenURL: {
-			name: 'Mac: Open URL',
+			name: 'Mac | Open URL',
 			description: 'Opens a URL in the default web browser.',
 			options: [
 				{
@@ -1162,7 +1200,7 @@ export function UpdateActions(self: ScriptLauncherInstance): void {
 		},
 
 		macToggleDarkMode: {
-			name: 'Mac: Toggle Dark Mode',
+			name: 'Mac | Toggle Dark Mode',
 			description: 'Toggles system dark/light appearance.',
 			options: [],
 			callback: async () => {
@@ -1174,7 +1212,7 @@ export function UpdateActions(self: ScriptLauncherInstance): void {
 		},
 
 		macCaptureScreenshot: {
-			name: 'Mac: Capture Screenshot',
+			name: 'Mac | Capture Screenshot',
 			description: 'Take a screenshot and save it to the specified location.',
 			options: [
 				{
@@ -1283,7 +1321,7 @@ export function UpdateActions(self: ScriptLauncherInstance): void {
 		},
 
 		macKillDock: {
-			name: 'Mac: Restart Dock',
+			name: 'Mac | Restart Dock',
 			description: 'Restarts the Dock application.',
 			options: [],
 			callback: async () => {
@@ -1291,7 +1329,7 @@ export function UpdateActions(self: ScriptLauncherInstance): void {
 			},
 		},
 		macKillFinder: {
-			name: 'Mac: Restart Finder',
+			name: 'Mac | Restart Finder',
 			description: 'Restarts the Finder application.',
 			options: [],
 			callback: async () => {
@@ -1299,7 +1337,7 @@ export function UpdateActions(self: ScriptLauncherInstance): void {
 			},
 		},
 		macKillSystemUIServer: {
-			name: 'Mac: Restart SystemUIServer (Menu Bar)',
+			name: 'Mac | Restart SystemUIServer (Menu Bar)',
 			description: 'Restarts the SystemUIServer application.',
 			options: [],
 			callback: async () => {
@@ -1307,7 +1345,7 @@ export function UpdateActions(self: ScriptLauncherInstance): void {
 			},
 		},
 		macForceKillApp: {
-			name: 'Mac: Force Kill Application',
+			name: 'Mac | Force Kill Application',
 			description: 'Force kills an application by name.',
 			options: [
 				{
@@ -1329,7 +1367,7 @@ export function UpdateActions(self: ScriptLauncherInstance): void {
 			},
 		},
 		macKillCoreAudio: {
-			name: 'Mac: Restart CoreAudio',
+			name: 'Mac | Restart CoreAudio',
 			description: 'Restarts the CoreAudio service.',
 			options: [],
 			callback: async () => {
@@ -1337,7 +1375,7 @@ export function UpdateActions(self: ScriptLauncherInstance): void {
 			},
 		},
 		macLogout: {
-			name: 'Mac: Logout',
+			name: 'Mac | Logout',
 			description: 'Logs out the current user.',
 			options: [],
 			callback: async () => {
@@ -1345,7 +1383,7 @@ export function UpdateActions(self: ScriptLauncherInstance): void {
 			},
 		},
 		macChangeWallpaper: {
-			name: 'Mac: Change Wallpaper',
+			name: 'Mac | Change Wallpaper',
 			description: 'Set the desktop wallpaper for all monitors.',
 			options: [
 				{
@@ -1361,6 +1399,287 @@ export function UpdateActions(self: ScriptLauncherInstance): void {
 				const filePath = await self.parseVariablesInString(String(action.options.filePath))
 				const applescript = `tell application "System Events" to set picture of every desktop to "${filePath}"`
 				emitAppleScript(self, applescript)
+			},
+		},
+
+		//windows actions
+		windowsRunPowerShellScript: {
+			name: 'Windows | Run PowerShell Script',
+			description: 'Execute a PowerShell .ps1 script using ScriptLauncher',
+			options: [
+				{
+					type: 'textinput',
+					label: 'Script Path (.ps1)',
+					id: 'scriptPath',
+					default: 'C:\\Scripts\\example.ps1',
+					tooltip: 'Full path to your PowerShell script file',
+				},
+				{
+					type: 'textinput',
+					label: 'Arguments',
+					id: 'args',
+					default: '',
+					tooltip: 'Arguments passed to the script (space separated)',
+					useVariables: true,
+				},
+				{
+					type: 'textinput',
+					label: 'Input (STDIN)',
+					id: 'stdin',
+					default: '',
+					tooltip: 'Optional input to pass to STDIN of the script',
+					useVariables: true,
+				},
+			],
+			callback: async (action) => {
+				const scriptPath = await self.parseVariablesInString(String(action.options.scriptPath))
+				const args = await self.parseVariablesInString(String(action.options.args))
+				const stdin = await self.parseVariablesInString(String(action.options.stdin))
+
+				const argsArray: string[] = ['-ExecutionPolicy', 'Bypass', '-File', scriptPath]
+				if (args.length > 0) {
+					argsArray.push(...args.split(' '))
+				}
+
+				const obj = {
+					command: 'runScript',
+					password: self.config.password,
+					executable: 'powershell',
+					args: argsArray,
+					stdin,
+				}
+
+				self.socket.emit('command', obj)
+			},
+		},
+
+		windowsSpeakText: {
+			name: 'Windows | Speak Text',
+			description: 'Speaks text using the system voice (Windows only)',
+			options: [
+				{
+					type: 'textinput',
+					label: 'Text to Speak',
+					id: 'text',
+					default: 'Hello from Companion!',
+					useVariables: true,
+				},
+			],
+			callback: async (action) => {
+				const text = await self.parseVariablesInString(String(action.options.text))
+				const obj = {
+					command: 'runScript',
+					password: self.config.password,
+					executable: 'powershell',
+					args: [
+						'-Command',
+						`Add-Type -AssemblyName System.Speech; (New-Object System.Speech.Synthesis.SpeechSynthesizer).Speak('${text.replace(/'/g, "''")}')`,
+					],
+				}
+				self.socket.emit('command', obj)
+			},
+		},
+
+		windowsKillApp: {
+			name: 'Windows | Kill Application',
+			description: 'Force-kills a process by name (e.g., notepad)',
+			options: [
+				{
+					type: 'textinput',
+					label: 'Process Name',
+					id: 'processName',
+					default: 'notepad',
+					useVariables: true,
+					tooltip: 'Name of the process to kill (without .exe)',
+				},
+			],
+			callback: async (action) => {
+				const processName = await self.parseVariablesInString(String(action.options.processName))
+				const obj = {
+					command: 'runScript',
+					password: self.config.password,
+					executable: 'powershell',
+					args: ['-Command', `Stop-Process -Name "${processName}" -Force`],
+				}
+				self.socket.emit('command', obj)
+			},
+		},
+
+		windowsRunScheduledTask: {
+			name: 'Windows | Run Scheduled Task',
+			description: 'Triggers a scheduled task by name',
+			options: [
+				{
+					type: 'textinput',
+					label: 'Task Name',
+					id: 'taskName',
+					default: 'My Task',
+					useVariables: true,
+					tooltip: 'Name of the scheduled task to run',
+				},
+			],
+			callback: async (action) => {
+				const taskName = await self.parseVariablesInString(String(action.options.taskName))
+				const obj = {
+					command: 'runScript',
+					password: self.config.password,
+					executable: 'powershell',
+					args: ['-Command', `Start-ScheduledTask -TaskName "${taskName}"`],
+				}
+				self.socket.emit('command', obj)
+			},
+		},
+
+		windowsLaunchApp: {
+			name: 'Windows | Launch Application',
+			description: 'Launch an application (e.g., notepad.exe)',
+			options: [
+				{
+					type: 'textinput',
+					label: 'Application',
+					id: 'app',
+					default: 'notepad.exe',
+					useVariables: true,
+				},
+				{
+					type: 'textinput',
+					label: 'Arguments',
+					id: 'args',
+					default: '',
+					tooltip: 'Arguments to pass to the application (space separated)',
+					useVariables: true,
+				},
+			],
+			callback: async (action) => {
+				const app = await self.parseVariablesInString(String(action.options.app))
+				const args = await self.parseVariablesInString(String(action.options.args))
+				const obj = {
+					command: 'runScript',
+					password: self.config.password,
+					executable: app,
+					args: args.length > 0 ? args.split(' ') : [],
+				}
+				self.socket.emit('command', obj)
+			},
+		},
+
+		windowsRunScriptFile: {
+			name: 'Windows | Run Script File',
+			description: 'Run a .bat, .vbs, or .exe file',
+			options: [
+				{
+					type: 'textinput',
+					label: 'Script Path',
+					id: 'scriptPath',
+					default: 'C:\\Scripts\\example.bat',
+				},
+				{
+					type: 'textinput',
+					label: 'Arguments',
+					id: 'args',
+					default: '',
+				},
+			],
+			callback: async (action) => {
+				const path = await self.parseVariablesInString(String(action.options.scriptPath))
+				const args = await self.parseVariablesInString(String(action.options.args))
+				const obj = {
+					command: 'runScript',
+					password: self.config.password,
+					executable: path,
+					args: args.length > 0 ? args.split(' ') : [],
+				}
+				self.socket.emit('command', obj)
+			},
+		},
+
+		windowsTakeScreenshot: {
+			name: 'Windows | Take Screenshot to Clipboard',
+			description: 'Uses Snipping Tool to copy screenshot to clipboard',
+			options: [],
+			callback: async () => {
+				const obj = {
+					command: 'runScript',
+					password: self.config.password,
+					executable: 'SnippingTool.exe',
+					args: ['/clip'],
+				}
+				self.socket.emit('command', obj)
+			},
+		},
+
+		windowsChangeWallpaper: {
+			name: 'Windows | Set Desktop Wallpaper',
+			description: 'Changes Windows desktop wallpaper via PowerShell',
+			options: [
+				{
+					type: 'textinput',
+					label: 'Image Path',
+					id: 'imagePath',
+					default: 'C:\\Wallpapers\\image.jpg',
+					tooltip: 'Full path to the image file',
+					useVariables: true,
+				},
+			],
+			callback: async (action) => {
+				const imagePath = await self.parseVariablesInString(String(action.options.imagePath))
+				const script = `
+					Add-Type -TypeDefinition @"
+					using System.Runtime.InteropServices;
+					public class Wallpaper {
+						[DllImport("user32.dll", SetLastError = true)]
+						public static extern bool SystemParametersInfo(int uAction, int uParam, string lpvParam, int fuWinIni);
+					}
+					"@; [Wallpaper]::SystemParametersInfo(20, 0, "${imagePath}", 3)
+							`.trim()
+
+				const obj = {
+					command: 'runScript',
+					password: self.config.password,
+					executable: 'powershell',
+					args: ['-Command', script],
+				}
+				self.socket.emit('command', obj)
+			},
+		},
+
+		windowsOpenFolder: {
+			name: 'Windows | Open File or Folder',
+			description: 'Opens a file or folder in Explorer',
+			options: [
+				{
+					type: 'textinput',
+					label: 'Path',
+					id: 'path',
+					default: 'C:\\Users',
+					tooltip: 'Full path to the file or folder to open',
+					useVariables: true,
+				},
+			],
+			callback: async (action) => {
+				const path = await self.parseVariablesInString(String(action.options.path))
+				const obj = {
+					command: 'runScript',
+					password: self.config.password,
+					executable: 'explorer.exe',
+					args: [path],
+				}
+				self.socket.emit('command', obj)
+			},
+		},
+
+		windowsToggleMute: {
+			name: 'Windows | Toggle System Mute',
+			description: 'Mutes or unmutes the system volume',
+			options: [],
+			callback: async () => {
+				const obj = {
+					command: 'runScript',
+					password: self.config.password,
+					executable: 'powershell',
+					args: ['-Command', '(Get-Volume).Mute = -not (Get-Volume).Mute'],
+				}
+				self.socket.emit('command', obj)
 			},
 		},
 
@@ -1454,7 +1773,7 @@ export function UpdateActions(self: ScriptLauncherInstance): void {
 		},
 
 		facetimeCall: {
-			name: 'Mac: Start FaceTime Call',
+			name: 'Mac | Start FaceTime Call',
 			description: 'Starts a FaceTime call to a phone number or Apple ID.',
 			options: [{ id: 'target', type: 'textinput', label: 'Phone or Email', default: '' }],
 			callback: async (action) => {
