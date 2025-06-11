@@ -66,6 +66,9 @@ export class ScriptLauncherInstance extends InstanceBase<ModuleConfig> {
 		//set default CHOICES_DISKS
 		this.CHOICES_DISKS = [{ id: 'none', label: 'None Available' }]
 
+		//set default CHOICES_FONTS
+		this.CHOICES_FONTS = [{ id: 'none', label: 'None Available' }]
+
 		//set default CHOICES_NIC
 		this.CHOICES_NIC = [{ id: 'none', label: 'None Available' }]
 	}
