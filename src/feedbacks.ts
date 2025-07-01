@@ -132,9 +132,9 @@ export function UpdateFeedbacks(self: ScriptLauncherInstance): void {
 			const threshold = Number(feedback.options.threshold)
 			const disk = self.systemInfo.disks?.find((d) => d.mount === mount)
 
-			if (!disk || typeof disk.use !== 'number') return false
+			if (!disk || typeof disk.used !== 'number') return false
 
-			return disk.use >= threshold
+			return disk.used >= threshold
 		},
 	}
 
@@ -194,8 +194,11 @@ export function UpdateFeedbacks(self: ScriptLauncherInstance): void {
 			},
 		],
 		callback: async (feedback) => {
-			const iface = feedback.options.iface
+			const iface = feedback.options.nic
 			const nic = self.systemInfo.networkStats.find((n) => n.iface === iface)
+			console.log(self.systemInfo.networkStats)
+			console.log('Network Activity Load Feedback - iface:', iface)
+			console.log('Network Activity Feedback:', nic)
 
 			if (!nic || nic.utilization == null) {
 				// Always return a valid result object
@@ -209,6 +212,55 @@ export function UpdateFeedbacks(self: ScriptLauncherInstance): void {
 			} else {
 				return { bgcolor: combineRgb(0, 128, 0) }
 			}
+		},
+	}
+
+	feedbacks.networkOperstate = {
+		type: 'boolean',
+		name: 'Network Interface Operstate',
+		description: 'Triggers if the selected network interface is in a specific operstate (up/down)',
+		options: [
+			{
+				type: 'dropdown',
+				label: 'Network Interface',
+				id: 'nic',
+				default: self.CHOICES_NIC?.[0]?.id,
+				choices: self.CHOICES_NIC,
+			},
+			{
+				type: 'dropdown',
+				label: 'Operstate',
+				id: 'operstate',
+				default: 'up',
+				choices: [
+					{ id: 'up', label: 'Up' },
+					{ id: 'down', label: 'Down' },
+					{ id: 'unknown', label: 'Unknown' },
+				],
+			},
+		],
+		defaultStyle: {
+			color: combineRgb(255, 255, 255), // White text
+			bgcolor: combineRgb(255, 0, 0), // Red background
+		},
+		callback: async (feedback) => {
+			const iface = feedback.options.nic
+			const operstate = feedback.options.operstate
+			const nic = self.systemInfo.networkInterfaces.find((n) => n.iface === iface)
+
+			if (!nic || !nic.operstate) {
+				return false // Invalid or missing network interface
+			}
+
+			if (operstate === 'up' && nic.operstate === 'up') {
+				return true // Interface is up
+			} else if (operstate === 'down' && nic.operstate === 'down') {
+				return true // Interface is down
+			} else if (operstate === 'unknown' && nic.operstate !== 'up' && nic.operstate !== 'down') {
+				return true // Interface is in an unknown state
+			}
+
+			return false // Interface does not match the specified operstate
 		},
 	}
 
