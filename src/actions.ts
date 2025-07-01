@@ -166,8 +166,8 @@ export function UpdateActions(self: ScriptLauncherInstance): void {
 		},
 
 		moveFile: {
-			name: 'File Actions | Rename or Move File',
-			description: 'Rename or Move a File by providing the full source path and the new full destination path.',
+			name: 'File Actions | Rename, Copy, or Move File',
+			description: 'Rename, Copy, or Move a File by providing the full source path and the new full destination path.',
 			options: [
 				{
 					type: 'textinput',
