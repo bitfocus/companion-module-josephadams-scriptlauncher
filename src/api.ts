@@ -92,8 +92,16 @@ function processCommandResult(self: ScriptLauncherInstance, obj: any): void {
 
 			break
 		case 'uptime':
+			const uptimeSeconds = obj.result.uptime || 0
+
+			const days = Math.floor(uptimeSeconds / (60 * 60 * 24))
+			const hours = Math.floor((uptimeSeconds % (60 * 60 * 24)) / (60 * 60))
+			const minutes = Math.floor((uptimeSeconds % (60 * 60)) / 60)
+
+			const uptimePretty = `${days}d ${hours}h ${minutes}m`
+
 			self.setVariableValues({
-				uptime: obj.result.uptime,
+				uptime: uptimePretty,
 			})
 			break
 		case 'getSystemInfo':
@@ -133,6 +141,11 @@ function processCommandResult(self: ScriptLauncherInstance, obj: any): void {
 		case 'sendAlert':
 			if (self.config.verbose) {
 				self.log('debug', `Send Alert: ${JSON.stringify(obj.result)}`)
+			}
+			break
+		case 'moveFile':
+			if (self.config.verbose) {
+				self.log('debug', `Move File: ${JSON.stringify(obj.result)}`)
 			}
 			break
 		default:
@@ -233,8 +246,6 @@ function processSystemInfo(self: ScriptLauncherInstance, systemInfo: any): void 
 					[`disk_${safeId}_use_percent`]: `${disk.use?.toFixed(1) ?? '?'}%`,
 				})
 			})
-
-			
 		}
 
 		// GPU info
@@ -270,6 +281,7 @@ function processSystemInfo(self: ScriptLauncherInstance, systemInfo: any): void 
 
 		//Network Info
 		if (systemInfo && systemInfo.networkInterfaces && systemInfo.networkInterfaces.length > 0) {
+			self.systemInfo.networkInterfaces = systemInfo.networkInterfaces
 			buildNICChoices(self)
 
 			self.systemInfo.networkInterfaces.forEach((nic) => {
@@ -451,7 +463,7 @@ function buildNICChoices(self: ScriptLauncherInstance): void {
 	self.systemInfo.networkInterfaces.forEach((nic) => {
 		nicChoices.push({
 			id: nic.iface,
-			label: `${nic.iface} (${nic.ifaceName}) - ${nic.ip4 || nic.ip6 || 'No IP'}`,
+			label: `${nic.ifaceName} - ${nic.ip4 || nic.ip6 || 'No IP'}`,
 		})
 	})
 
