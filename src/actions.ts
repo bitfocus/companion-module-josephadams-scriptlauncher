@@ -1401,6 +1401,26 @@ export function UpdateActions(self: ScriptLauncherInstance): void {
 				emitAppleScript(self, applescript)
 			},
 		},
+		macOpenChrome: {
+			name: 'Mac | Open Chrome',
+			description: 'Opens Google Chrome.',
+			options: [
+				{
+					type: 'checkbox',
+					label: 'Open with Silent Debugger Extension API',
+					id: 'silentDebugger',
+					default: false,
+				}
+			],
+			callback: async (action) => {
+				const silentDebugger = action.options.silentDebugger
+				if (silentDebugger) {
+					emitShellCommand(self, 'open -a "/Applications/Google\ Chrome.app/Contents/MacOS/Google\ Chrome --silent-debugger-extension-api')
+				} else {
+					emitShellCommand(self, 'open -a "Google Chrome"')
+				}
+			},
+		},
 
 		//windows actions
 		windowsRunPowerShellScript: {
@@ -1678,6 +1698,29 @@ export function UpdateActions(self: ScriptLauncherInstance): void {
 					password: self.config.password,
 					executable: 'powershell',
 					args: ['-Command', '(Get-Volume).Mute = -not (Get-Volume).Mute'],
+				}
+				self.socket.emit('command', obj)
+			},
+		},
+
+		windowsOpenChrome: {
+			name: 'Windows | Open Chrome',
+			description: 'Opens Google Chrome.',
+			options: [
+				{
+					type: 'checkbox',
+					label: 'Open with Silent Debugger Extension API',
+					id: 'silentDebugger',
+					default: false,
+				}
+			],
+			callback: async (action) => {
+				const silentDebugger = action.options.silentDebugger
+				const obj = {
+					command: 'runScript',
+					password: self.config.password,
+					executable: 'chrome.exe',
+					args: silentDebugger ? ['--silent-debugger-extension-api'] : [],
 				}
 				self.socket.emit('command', obj)
 			},
