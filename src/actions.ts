@@ -1415,7 +1415,7 @@ export function UpdateActions(self: ScriptLauncherInstance): void {
 			callback: async (action) => {
 				const silentDebugger = action.options.silentDebugger
 				if (silentDebugger) {
-					emitShellCommand(self, 'open -a "/Applications/Google\ Chrome.app/Contents/MacOS/Google\ Chrome --silent-debugger-extension-api')
+					emitShellCommand(self, 'open -a "Google Chrome" --args --silent-debugger-extension-api')
 				} else {
 					emitShellCommand(self, 'open -a "Google Chrome"')
 				}

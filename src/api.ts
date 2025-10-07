@@ -148,6 +148,11 @@ function processCommandResult(self: ScriptLauncherInstance, obj: any): void {
 				self.log('debug', `Move File: ${JSON.stringify(obj.result)}`)
 			}
 			break
+		case 'moveFileBasedOnSize':
+			if (self.config.verbose) {
+				self.log('debug', `Move File Based On Size: ${JSON.stringify(obj.result)}`)
+			}
+			break
 		default:
 			self.log('debug', `Unknown command result: ${obj.command}`)
 			break
